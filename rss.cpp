@@ -1,0 +1,77 @@
+#include "rss.hpp"
+
+int main(int argc, char* argv[]){
+    std::locale::global(std::locale(""));
+    mongocxx::instance inst{};
+    mongocxx::client conn{mongocxx::uri{"mongodb://admin:ordenador@192.168.0.165:27017/?authSource=admin"}};
+
+    auto col = conn["database"]["blogs"];
+    auto cursor = col.find({});
+
+    for (auto&& doc : cursor) {
+        std::string blog= doc["blog"].get_utf8().value.to_string();
+        std::string articulo= doc["articulo"].get_utf8().value.to_string();
+        std::string last;
+        if(blog == "Así habló Cicerón") {
+            std::string xml=request(doc["url"].get_utf8().value.to_string());
+            last=parserss(xml,collection::ciceron, articulo);
+        }
+        else if(blog == "To You, the Immortal") {
+            std::string xml=request(doc["url"].get_utf8().value.to_string());
+            last=parserss(xml,collection::inmortal, articulo);
+        }
+        else {
+            std::string xml=request(doc["url"].get_utf8().value.to_string(),"curl");
+            last=parserss(xml,collection::blog, articulo);
+        }
+        if(!last.empty() && last!=articulo){
+            /*
+               col.update_one(bsoncxx::builder::stream::document{} << "blog" << blog << bsoncxx::builder::stream::finalize,
+               bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "articulo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
+               */
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    }
+    col = conn["database"]["podcast"];
+    cursor = col.find({});
+
+    for (auto&& doc : cursor) {
+        std::string podcast= doc["nombre"].get_utf8().value.to_string();
+        std::string articulo= doc["ultimo"].get_utf8().value.to_string();
+        std::string xml=request(doc["url"].get_utf8().value.to_string(),"curl");
+        std::string last=parserss(xml,collection::podcast, articulo);
+        if(!last.empty() && last!=articulo){
+            /*
+               col.update_one(bsoncxx::builder::stream::document{} << "nombre" << podcast << bsoncxx::builder::stream::finalize,
+               bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "ultimo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
+               */
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
+    col = conn["database"]["youtube"];
+    bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = col.find_one(bsoncxx::builder::stream::document{}<<"hora"<<bsoncxx::builder::stream::open_document <<"$exists"<<true<<bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
+    if(maybe_result){
+        bsoncxx::document::element hora =  maybe_result.value().view()["hora"];
+        std::time_t date = std::chrono::system_clock::to_time_t(hora.get_date());
+        std::time_t last=date;
+        cursor = col.find(bsoncxx::builder::stream::document{}<<"descargar"<<true<<bsoncxx::builder::stream::finalize);
+
+        for (auto&& doc : cursor) {
+            std::cout << doc["nombre"].get_utf8().value.to_string() << std::endl;
+            std::string xml=request("https://www.youtube.com/feeds/videos.xml?channel_id="+doc["id"].get_utf8().value.to_string());
+            std::time_t time=parserss(xml, date);
+            if(time>last)last=time;
+        }
+        if(last!=date){
+            std::cout << std::asctime(std::localtime(&last)) << std::endl;
+            bsoncxx::types::b_date doc=bsoncxx::types::b_date{
+                std::chrono::system_clock::from_time_t(last)
+            };
+            /*
+               col.update_one(bsoncxx::builder::stream::document{}<<"hora"<<bsoncxx::builder::stream::open_document <<"$exists"<<true<<bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize,
+               bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "hora" << doc << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
+               */
+        }
+    }
+}
