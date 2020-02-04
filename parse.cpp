@@ -124,6 +124,7 @@ std::time_t parseyoutube(const xmlpp::Node* node,std::time_t last)
                     std::istringstream ss(getcontent(child));
                     ss >> std::get_time(&t, "%Y-%m-%dT%H:%M:%S+00:00");
                     time = mktime(&t);
+                    if(time<=last)return time;
                 }
                 else if(childname=="title") {
                     title=getcontent(child);
@@ -132,10 +133,8 @@ std::time_t parseyoutube(const xmlpp::Node* node,std::time_t last)
                     link=getcontent(child);
                 }
             }
-            std::cout << title << std::endl;
             std::cout << link << std::endl;
             system((std::string("./youtube ")+link).c_str());
-            if(time<=last)return time;
         }
     }
     return std::time_t(0);
