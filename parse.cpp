@@ -22,7 +22,7 @@ std::string getcontent(const xmlpp::Node* node){
     }
     return "";
 }
-std::string parseImmortal(const xmlpp::Node* node, std::string last)
+std::string parseImmortal(const xmlpp::Node* node, const std::string& last)
 {
     std::string first="";
     for(const auto& item : node->get_children())
@@ -50,7 +50,7 @@ std::string parseImmortal(const xmlpp::Node* node, std::string last)
     }
     return first;
 }
-std::string parseblog(const xmlpp::Node* node, const std::string&& entry, std::string last)
+std::string parseblog(const xmlpp::Node* node, const std::string&& entry, const std::string& last)
 {
     std::string first="";
     for(const auto& item : node->get_children())
@@ -76,7 +76,7 @@ std::string parseblog(const xmlpp::Node* node, const std::string&& entry, std::s
     }
     return first;
 }
-std::string parsepodcast(const xmlpp::Node* node, std::string last)
+std::string parsepodcast(const xmlpp::Node* node, const std::string& last)
 {
     std::string first="";
     for(const auto& item : node->get_children())
@@ -107,7 +107,7 @@ std::string parsepodcast(const xmlpp::Node* node, std::string last)
     }
     return first;
 }
-std::time_t parseyoutube(const xmlpp::Node* node,std::time_t last)
+std::time_t parseyoutube(const xmlpp::Node* node, std::time_t last)
 {
     for(const auto& item : node->get_children())
     {
@@ -138,7 +138,7 @@ std::time_t parseyoutube(const xmlpp::Node* node,std::time_t last)
     }
     return std::time_t(0);
 }
-std::string parserss(const std::string& xml, collection col, std::string last)
+std::string parserss(const std::string& xml, collection col, const std::string& last)
 {
     try
     {
@@ -180,7 +180,7 @@ std::string parserss(const std::string& xml, collection col, std::string last)
         return "";
     }
 }
-std::time_t parserss(const std::string& xml, std::time_t last)
+std::time_t parserss(const std::string& xml, std::time_t last, const std::string& nombre)
 {
     try
     {
