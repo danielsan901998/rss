@@ -102,7 +102,7 @@ std::string parsepodcast(const xmlpp::Node* node, const std::string& last)
                 }
             }
             std::replace( title.begin(), title.end(), '/', '-');
-            download(link, "~/videos/"+title+".mp3");
+            download(link, "~/videos/podcast/"+title+".mp3");
         }
     }
     return first;
@@ -150,36 +150,36 @@ std::time_t parseyoutube(const xmlpp::Node* node, std::time_t last, std::string 
                 if(nombre=="alexelcapo"){
                     if(title.find("ENELSMADLH")!=std::string::npos)system((std::string("./youtube ")+link+" resto").c_str());
                 }
-                if(nombre=="Adult Swim"){
+                else if(nombre=="Adult Swim"){
                     if(title.find("Off the Air")!=std::string::npos)system((std::string("./youtube ")+link+" ver").c_str());
                 }
-                if(nombre=="Pazos64"){
+                else if(nombre=="Pazos64"){
                     if(title.find("Incluso de Videojuegos")==std::string::npos)system((std::string("./youtube ")+link+" ver").c_str());
                 }
-                if(nombre=="Accursed Farms"){
+                else if(nombre=="Accursed Farms"){
                     if(title.find("Videochat")==std::string::npos)system((std::string("./youtube ")+link+" ver").c_str());
                 }
-                if(nombre=="Cinemassacre"){
+                else if(nombre=="Cinemassacre"){
                     if(title.find("Angry Video Game Nerd")!=std::string::npos)system((std::string("./youtube ")+link+" ver").c_str());
                 }
-                if(nombre=="The Majority Report w/ Sam Seder"){
-                    if(title.find("MR Live")==std::string::npos)system((std::string("./youtube ")+link+" podcast").c_str());
+                else if(nombre=="The Majority Report w/ Sam Seder"){
+                    if(title.find("MR ")==std::string::npos)system((std::string("./youtube ")+link+" podcast").c_str());
                 }
-                if(nombre=="The Michael Brooks Show"){
+                else if(nombre=="The Michael Brooks Show"){
                     if(title.find("TMBS -")==std::string::npos)system((std::string("./youtube ")+link+" podcast").c_str());
                 }
-                if(nombre=="FilmJoy"){
+                else if(nombre=="FilmJoy"){
                     if(title.find("Movies with Mikey")!=std::string::npos)system((std::string("./youtube ")+link+" ver").c_str());
                 }
-                if(nombre=="ElRichMC - Minecraft & Gaming a otro nivel"){
+                else if(nombre=="ElRichMC - Minecraft & Gaming a otro nivel"){
                     if(title.find("Minecraft Review")!=std::string::npos)system((std::string("./youtube ")+link+" ver").c_str());
                     else if(title.find("Hardcore Flatlands")!=std::string::npos)system((std::string("./youtube ")+link+" ver").c_str());
                     else if(title.find("Survival 1.7")!=std::string::npos)system((std::string("./youtube ")+link+" ver").c_str());
                 }
-                if(nombre=="LowkoTV"){
+                else if(nombre=="LowkoTV"){
                     if(title.find("StarCraft")!=std::string::npos)system((std::string("./youtube ")+link+" ver").c_str());
                 }
-                if(nombre=="Escapist"){
+                else if(nombre=="Escapist"){
                     if(title.find("The Big Picture")!=std::string::npos)system((std::string("./youtube ")+link+" ver").c_str());
                     else if(title.find("Zero Punctuation")!=std::string::npos)system((std::string("./youtube ")+link+" ver").c_str());
                     else if(title.find("Yahtzee's Dev Diary")!=std::string::npos)system((std::string("./youtube ")+link+" ver").c_str());
