@@ -102,7 +102,7 @@ std::string parsepodcast(const xmlpp::Node* node, std::string last)
                 }
             }
             std::replace( title.begin(), title.end(), '/', '-');
-            download(link, title+".mp3");
+            download(link, "~/videos/"+title+".mp3");
         }
     }
     return first;
@@ -134,7 +134,6 @@ std::time_t parseyoutube(const xmlpp::Node* node,std::time_t last)
                 }
             }
             std::cout << link << std::endl;
-            system((std::string("./youtube ")+link).c_str());
         }
     }
     return std::time_t(0);
