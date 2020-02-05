@@ -1,2 +1,5 @@
 #!/bin/sh
 mkdir ~/videos
+mkdir ~/videos/ver
+mkdir ~/videos/podcast
+mkdir ~/videos/resto
