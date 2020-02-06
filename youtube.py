@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import youtube_dl
 import sys
 import os
