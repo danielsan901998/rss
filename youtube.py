@@ -13,6 +13,7 @@ if(args>1):
     default = {
             'format': 'best',  # choice of quality
             'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',         # name the file the ID of the video
+            'quiet': True,
             }
     ydl1 = youtube_dl.YoutubeDL(default)
     try:
