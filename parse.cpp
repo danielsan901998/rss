@@ -109,7 +109,7 @@ std::string parsepodcast(const xmlpp::Node* node, const std::string& last)
 }
 std::time_t parseyoutube(const xmlpp::Node* node, std::time_t last, std::string nombre)
 {
-    std::string command="./youtube.py ";
+    std::string command="~/bin/youtube ";
     bool check=false;
     if(nombre=="alexelcapo")check=true;
     else if(nombre=="Adult Swim")check=true;

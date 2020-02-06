@@ -3,7 +3,7 @@
 int main(int argc, char* argv[]){
     std::locale::global(std::locale(""));
     mongocxx::instance inst{};
-    mongocxx::client conn{mongocxx::uri{"mongodb://admin:ordenador@192.168.0.165:27017/?authSource=admin"}};
+    mongocxx::client conn{mongocxx::uri{}};
 
     auto col = conn["database"]["blogs"];
     auto cursor = col.find({});
@@ -25,10 +25,8 @@ int main(int argc, char* argv[]){
             last=parserss(xml,collection::blog, articulo);
         }
         if(!last.empty() && last!=articulo){
-            /*
-               col.update_one(bsoncxx::builder::stream::document{} << "blog" << blog << bsoncxx::builder::stream::finalize,
-               bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "articulo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
-               */
+            col.update_one(bsoncxx::builder::stream::document{} << "blog" << blog << bsoncxx::builder::stream::finalize,
+                    bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "articulo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
@@ -41,10 +39,8 @@ int main(int argc, char* argv[]){
         std::string xml=request(doc["url"].get_utf8().value.to_string(),"curl");
         std::string last=parserss(xml,collection::podcast, articulo);
         if(!last.empty() && last!=articulo){
-            /*
-               col.update_one(bsoncxx::builder::stream::document{} << "nombre" << podcast << bsoncxx::builder::stream::finalize,
-               bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "ultimo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
-               */
+            col.update_one(bsoncxx::builder::stream::document{} << "nombre" << podcast << bsoncxx::builder::stream::finalize,
+                    bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "ultimo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
@@ -68,10 +64,8 @@ int main(int argc, char* argv[]){
             bsoncxx::types::b_date doc=bsoncxx::types::b_date{
                 std::chrono::system_clock::from_time_t(last)
             };
-            /*
-               col.update_one(bsoncxx::builder::stream::document{}<<"hora"<<bsoncxx::builder::stream::open_document <<"$exists"<<true<<bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize,
-               bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "hora" << doc << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
-               */
+            col.update_one(bsoncxx::builder::stream::document{}<<"hora"<<bsoncxx::builder::stream::open_document <<"$exists"<<true<<bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize,
+                    bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "hora" << doc << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
         }
     }
 }

@@ -55,9 +55,19 @@ void download(const std::string& string, const std::string& filename)
     try
     {
         curlpp::Cleanup myCleanup;
-
-        {
+        curlpp::Easy request;
+        request.setOpt(new curlpp::options::Url(string));
+        request.setOpt(new curlpp::options::Header(1));
+        request.perform();
+        char* url;
+        long code = curlpp::infos::ResponseCode::get(request);
+        if(code==200){
             os << curlpp::options::Url(string);
+            return;
+        }
+        else{
+            curlpp::InfoGetter::get(request,CURLINFO_REDIRECT_URL, url);
+            os << curlpp::options::Url(url);
             return;
         }
     }
