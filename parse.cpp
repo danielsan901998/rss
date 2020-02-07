@@ -112,6 +112,7 @@ std::time_t parseyoutube(const xmlpp::Node* node, std::time_t last, std::string 
     std::string command="~/bin/youtube ";
     std::string output=">> ~/youtube.txt";
     bool check=false;
+    std::time_t first=last;
     if(nombre=="alexelcapo")check=true;
     else if(nombre=="Adult Swim")check=true;
     else if(nombre=="Pazos64")check=true;
@@ -139,7 +140,7 @@ std::time_t parseyoutube(const xmlpp::Node* node, std::time_t last, std::string 
                     std::istringstream ss(getcontent(child));
                     ss >> std::get_time(&t, "%Y-%m-%dT%H:%M:%S+00:00");
                     time = mktime(&t);
-                    if(time<=last)return time;
+                    if(time<=last)return first;
                 }
                 else if(childname=="title") {
                     title=getcontent(child);
