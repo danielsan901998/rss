@@ -111,19 +111,7 @@ std::time_t parseyoutube(const xmlpp::Node* node, std::time_t last, std::string 
 {
     std::string command="~/bin/youtube ";
     std::string output=">> ~/youtube.txt";
-    bool check=false;
     std::time_t first=last;
-    if(nombre=="alexelcapo")check=true;
-    else if(nombre=="Adult Swim")check=true;
-    else if(nombre=="Pazos64")check=true;
-    else if(nombre=="Accursed Farms")check=true;
-    else if(nombre=="Cinemassacre")check=true;
-    else if(nombre=="The Majority Report w/ Sam Seder")check=true;
-    else if(nombre=="The Michael Brooks Show")check=true;
-    else if(nombre=="FilmJoy")check=true;
-    else if(nombre=="ElRichMC - Minecraft & Gaming a otro nivel")check=true;
-    else if(nombre=="LowkoTV")check=true;
-    else if(nombre=="Escapist")check=true;
 
     for(const auto& item : node->get_children())
     {
@@ -150,45 +138,42 @@ std::time_t parseyoutube(const xmlpp::Node* node, std::time_t last, std::string 
                     link=getcontent(child);
                 }
             }
-            if(check){
-                if(nombre=="alexelcapo"){
-                    if(title.find("ENELSMADLH")!=std::string::npos)system((command+link+" resto"+output).c_str());
-                }
-                else if(nombre=="Adult Swim"){
-                    if(title.find("Off the Air")!=std::string::npos)system((command+link+" ver"+output).c_str());
-                }
-                else if(nombre=="Pazos64"){
-                    if(title.find("Incluso de Videojuegos")==std::string::npos)system((command+link+" ver"+output).c_str());
-                }
-                else if(nombre=="Accursed Farms"){
-                    if(title.find("Videochat")==std::string::npos)system((command+link+" ver"+output).c_str());
-                }
-                else if(nombre=="Cinemassacre"){
-                    if(title.find("Angry Video Game Nerd")!=std::string::npos)system((command+link+" ver"+output).c_str());
-                }
-                else if(nombre=="The Majority Report w/ Sam Seder"){
-                    if(title.find("MR ")==std::string::npos)system((command+link+" podcast"+output).c_str());
-                }
-                else if(nombre=="The Michael Brooks Show"){
-                    if(title.find("TMBS -")==std::string::npos)system((command+link+" podcast"+output).c_str());
-                }
-                else if(nombre=="FilmJoy"){
-                    if(title.find("Movies with Mikey")!=std::string::npos)system((command+link+" ver"+output).c_str());
-                }
-                else if(nombre=="ElRichMC - Minecraft & Gaming a otro nivel"){
-                    if(title.find("Minecraft Review")!=std::string::npos)system((command+link+" ver"+output).c_str());
-                    else if(title.find("Hardcore Flatlands")!=std::string::npos)system((command+link+" ver"+output).c_str());
-                    else if(title.find("Survival 1.7")!=std::string::npos)system((command+link+" ver"+output).c_str());
-                }
-                else if(nombre=="LowkoTV"){
-                    if(title.find("StarCraft")!=std::string::npos)system((command+link+" ver"+output).c_str());
-                }
-                else if(nombre=="Escapist"){
-                    if(title.find("The Big Picture")!=std::string::npos)system((command+link+" ver"+output).c_str());
-                    else if(title.find("Zero Punctuation")!=std::string::npos)system((command+link+" ver"+output).c_str());
-                    else if(title.find("Yahtzee's Dev Diary")!=std::string::npos)system((command+link+" ver"+output).c_str());
-                }
-
+            if(nombre=="alexelcapo"){
+                if(title.find("ENELSMADLH")!=std::string::npos)system((command+link+" resto"+output).c_str());
+            }
+            else if(nombre=="Adult Swim"){
+                if(title.find("Off the Air")!=std::string::npos)system((command+link+" ver"+output).c_str());
+            }
+            else if(nombre=="Pazos64"){
+                if(title.find("Incluso de Videojuegos")==std::string::npos)system((command+link+" ver"+output).c_str());
+            }
+            else if(nombre=="Accursed Farms"){
+                if(title.find("Videochat")==std::string::npos)system((command+link+" ver"+output).c_str());
+            }
+            else if(nombre=="Cinemassacre"){
+                if(title.find("Angry Video Game Nerd")!=std::string::npos)system((command+link+" ver"+output).c_str());
+            }
+            else if(nombre=="The Majority Report w/ Sam Seder"){
+                if(title.find("MR ")==std::string::npos)system((command+link+" podcast"+output).c_str());
+            }
+            else if(nombre=="The Michael Brooks Show"){
+                if(title.find("TMBS -")==std::string::npos)system((command+link+" podcast"+output).c_str());
+            }
+            else if(nombre=="FilmJoy"){
+                if(title.find("Movies with Mikey")!=std::string::npos)system((command+link+" ver"+output).c_str());
+            }
+            else if(nombre=="ElRichMC - Minecraft & Gaming a otro nivel"){
+                if(title.find("Minecraft Review")!=std::string::npos)system((command+link+" ver"+output).c_str());
+                else if(title.find("Hardcore Flatlands")!=std::string::npos)system((command+link+" ver"+output).c_str());
+                else if(title.find("Survival 1.7")!=std::string::npos)system((command+link+" ver"+output).c_str());
+            }
+            else if(nombre=="LowkoTV"){
+                if(title.find("StarCraft")!=std::string::npos)system((command+link+" ver"+output).c_str());
+            }
+            else if(nombre=="Escapist"){
+                if(title.find("The Big Picture")!=std::string::npos)system((command+link+" ver"+output).c_str());
+                else if(title.find("Zero Punctuation")!=std::string::npos)system((command+link+" ver"+output).c_str());
+                else if(title.find("Yahtzee's Dev Diary")!=std::string::npos)system((command+link+" ver"+output).c_str());
             }
             else{
                 system((command+link+output).c_str());
