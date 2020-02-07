@@ -54,31 +54,31 @@ void download(const std::string& string, const std::string& filename)
     std::ofstream os(filename);
     try
     {
-	curlpp::Cleanup myCleanup;
-	curlpp::Easy request;
-	request.setOpt(new curlpp::options::Url(string));
+        curlpp::Cleanup myCleanup;
+        curlpp::Easy request;
+        request.setOpt(new curlpp::options::Url(string));
         request.setOpt(new curlpp::options::NoBody(true));
         request.perform();
-	char* url;
-	long code = curlpp::infos::ResponseCode::get(request);
-	if(code==200){
-	    os << curlpp::options::Url(string);
-	    return;
-	}
-	else{
-	    curlpp::InfoGetter::get(request,CURLINFO_REDIRECT_URL, url);
-	    os << curlpp::options::Url(url);
-	    return;
-	}
+        char* url;
+        long code = curlpp::infos::ResponseCode::get(request);
+        if(code==200){
+            os << curlpp::options::Url(string);
+            return;
+        }
+        else{
+            curlpp::InfoGetter::get(request,CURLINFO_REDIRECT_URL, url);
+            os << curlpp::options::Url(url);
+            return;
+        }
     }
 
     catch( curlpp::RuntimeError &e )
     {
-	std::cout << e.what() << std::endl;
+        std::cout << e.what() << std::endl;
     }
 
     catch( curlpp::LogicError &e )
     {
-	std::cout << e.what() << std::endl;
+        std::cout << e.what() << std::endl;
     }
 }
