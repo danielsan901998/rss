@@ -141,6 +141,7 @@ std::time_t parseyoutube(const xmlpp::Node* node, std::time_t last, std::string 
                     ss >> std::get_time(&t, "%Y-%m-%dT%H:%M:%S+00:00");
                     time = mktime(&t);
                     if(time<=last)return first;
+                    else if(first==last) first=time;
                 }
                 else if(childname=="title") {
                     title=getcontent(child);
