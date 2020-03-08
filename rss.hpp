@@ -30,5 +30,7 @@ enum class collection{
 std::string request(const std::string& string);
 std::string request(const std::string& string, const std::string&& agent);
 void download(const std::string& string, const std::string& filename);
-std::string parserss(const std::string& xml, collection col, const std::string& last);
-std::time_t parserss(const std::string& xml, std::time_t last, const std::string& nombre);
+std::string parseImmortal(const std::string& xml, const std::string& last);
+std::string parseblog(const std::string& xml, const std::string& last);
+std::string parsepodcast(const std::string& xml, const std::string& last);
+std::time_t parseyoutube(const std::string& xml, std::time_t last, std::string nombre);

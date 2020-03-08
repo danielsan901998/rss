@@ -22,9 +22,11 @@ std::string getcontent(const xmlpp::Node* node){
     }
     return "";
 }
-std::string parseImmortal(const xmlpp::Node* node, const std::string& last)
+std::string parseImmortal(const std::string& xml, const std::string& last)
 {
+    const xmlpp::Node* node = parserss(xml);
     std::string first="";
+    if(node==null)return first;
     for(const auto& item : node->get_children())
     {
         const auto nodename = item->get_name();
@@ -50,13 +52,15 @@ std::string parseImmortal(const xmlpp::Node* node, const std::string& last)
     }
     return first;
 }
-std::string parseblog(const xmlpp::Node* node, const std::string&& entry, const std::string& last)
+std::string parseblog(const std::string& xml, const std::string& last)
 {
+    const xmlpp::Node* node = parserss(xml);
     std::string first="";
+    if(node==null)return first;
     for(const auto& item : node->get_children())
     {
         const auto nodename = item->get_name();
-        if(nodename==entry){
+        if(nodename=="item" || nodename=="entry"){
             std::string title;
             std::string link;
             for(const auto& child : item->get_children())
@@ -76,9 +80,11 @@ std::string parseblog(const xmlpp::Node* node, const std::string&& entry, const 
     }
     return first;
 }
-std::string parsepodcast(const xmlpp::Node* node, const std::string& last)
+std::string parsepodcast(const std::string& xml, const std::string& last)
 {
+    const xmlpp::Node* node = parserss(xml);
     std::string first="";
+    if(node==null)return first;
     for(const auto& item : node->get_children())
     {
         const auto nodename = item->get_name();
@@ -107,8 +113,10 @@ std::string parsepodcast(const xmlpp::Node* node, const std::string& last)
     }
     return first;
 }
-std::time_t parseyoutube(const xmlpp::Node* node, std::time_t last, std::string nombre)
+std::time_t parseyoutube(const std::string& xml, std::time_t last, std::string nombre)
 {
+    const xmlpp::Node* node = parserss(xml);
+    if(node==null)return std::time_t(0);
     std::string command="~/bin/youtube ";
     std::string output=">> ~/youtube.txt";
     std::time_t first=last;
@@ -182,18 +190,19 @@ std::time_t parseyoutube(const xmlpp::Node* node, std::time_t last, std::string 
     }
     return std::time_t(0);
 }
-std::string parserss(const std::string& xml, collection col, const std::string& last)
+xmlpp::Node* parserss(const std::string& xml)
 {
     try
     {
         xmlpp::DomParser parser;
         parser.parse_memory(xml);
+        const xmlpp::Node* node;
         if(parser)
         {
             const xmlpp::Node* pNode = parser.get_document()->get_root_node();
-            const xmlpp::Node* node;
             if(pNode->get_name()=="feed"){
                 node = pNode;
+                return node;
             }
             else{
                 for(const xmlpp::Node* child : pNode->get_children())
@@ -201,47 +210,16 @@ std::string parserss(const std::string& xml, collection col, const std::string& 
                     const auto nodename = child->get_name();
                     if(nodename=="channel"){
                         node = child;
-                        break;
+                        return nodeM
                     }
                 }
             }
-            switch(col){
-                case collection::ciceron:
-                    return parseblog(node,"entry", last);
-                case collection::inmortal:
-                    return parseImmortal(node, last);
-                case collection::blog:
-                    return parseblog(node,"item", last);
-                case collection::podcast:
-                    return parsepodcast(node, last);
-            }
         }
-        return "";
+        return node;
     }
     catch(const std::exception& ex)
     {
         std::cerr << "Exception caught: " << ex.what() << std::endl;
-        return "";
-    }
-}
-std::time_t parserss(const std::string& xml, std::time_t last, const std::string& nombre)
-{
-    try
-    {
-        xmlpp::DomParser parser;
-        parser.parse_memory(xml);
-        if(parser)
-        {
-            const xmlpp::Node* pNode = parser.get_document()->get_root_node();
-            if(pNode->get_name()=="feed"){
-                return parseyoutube(pNode, last, nombre);
-            }
-        }
-        return std::time_t(0);
-    }
-    catch(const std::exception& ex)
-    {
-        std::cerr << "Exception caught: " << ex.what() << std::endl;
-        return std::time_t(0);
+        return node;
     }
 }

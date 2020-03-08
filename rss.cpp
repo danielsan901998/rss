@@ -14,15 +14,15 @@ int main(int argc, char* argv[]){
         std::string last;
         if(blog == "Así habló Cicerón") {
             std::string xml=request(doc["url"].get_utf8().value.to_string());
-            last=parserss(xml,collection::ciceron, articulo);
+            last=parseblog(xml, articulo);
         }
         else if(blog == "To You, the Immortal") {
             std::string xml=request(doc["url"].get_utf8().value.to_string());
-            last=parserss(xml,collection::inmortal, articulo);
+            last=parseImmortal(xml, articulo);
         }
         else {
             std::string xml=request(doc["url"].get_utf8().value.to_string(),"curl");
-            last=parserss(xml,collection::blog, articulo);
+            last=parseblog(xml, articulo);
         }
         if(!last.empty() && last!=articulo){
             col.update_one(bsoncxx::builder::stream::document{} << "blog" << blog << bsoncxx::builder::stream::finalize,
@@ -37,7 +37,7 @@ int main(int argc, char* argv[]){
         std::string podcast= doc["nombre"].get_utf8().value.to_string();
         std::string articulo= doc["ultimo"].get_utf8().value.to_string();
         std::string xml=request(doc["url"].get_utf8().value.to_string(),"curl");
-        std::string last=parserss(xml,collection::podcast, articulo);
+        std::string last=parsepodcast(xml, articulo);
         if(!last.empty() && last!=articulo){
             col.update_one(bsoncxx::builder::stream::document{} << "nombre" << podcast << bsoncxx::builder::stream::finalize,
                     bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "ultimo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
@@ -56,7 +56,7 @@ int main(int argc, char* argv[]){
         for (auto&& doc : cursor) {
             std::string nombre=doc["nombre"].get_utf8().value.to_string();
             std::string xml=request("https://www.youtube.com/feeds/videos.xml?channel_id="+doc["id"].get_utf8().value.to_string());
-            std::time_t time=parserss(xml, date, nombre);
+            std::time_t time=parseyoutube(xml, nombre);
             if(time>last)last=time;
         }
         if(last!=date){
