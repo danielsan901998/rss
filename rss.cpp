@@ -56,7 +56,7 @@ int main(int argc, char* argv[]){
         for (auto&& doc : cursor) {
             std::string nombre=doc["nombre"].get_utf8().value.to_string();
             std::string xml=request("https://www.youtube.com/feeds/videos.xml?channel_id="+doc["id"].get_utf8().value.to_string());
-            std::time_t time=parseyoutube(xml, nombre);
+            std::time_t time=parseyoutube(xml,last, nombre);
             if(time>last)last=time;
         }
         if(last!=date){

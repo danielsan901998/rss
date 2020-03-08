@@ -20,12 +20,6 @@
 #include <mongocxx/client.hpp>
 #include <mongocxx/instance.hpp>
 
-enum class collection{
-    ciceron,
-    inmortal,
-    blog,
-    podcast
-};
 
 std::string request(const std::string& string);
 std::string request(const std::string& string, const std::string&& agent);
