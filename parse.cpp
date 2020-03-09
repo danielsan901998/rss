@@ -1,37 +1,23 @@
 #include "rss.hpp"
-const xmlpp::Node* parserss(const std::string& xml)
+const xmlpp::Node* getroot(const xmlpp::DomParser& parser)
 {
-    const xmlpp::Node* node;
-    try
-    {
-        xmlpp::DomParser parser;
-        parser.parse_memory(xml);
-        if(parser)
-        {
-            const xmlpp::Node* pNode = parser.get_document()->get_root_node();
-            if(pNode->get_name()=="feed"){
-                node = pNode;
-                return node;
-            }
-            else{
-                for(const xmlpp::Node* child : pNode->get_children())
-                {
-                    const auto nodename = child->get_name();
-                    if(nodename=="channel"){
-                        node = child;
-                        return node;
-                    }
+    if(parser){
+        const xmlpp::Node* node;
+        const xmlpp::Node* pNode = parser.get_document()->get_root_node();
+        if(pNode->get_name()=="feed"){
+            return pNode;
+        }
+        else{
+            for(const xmlpp::Node* child : pNode->get_children())
+            {
+                const auto nodename = child->get_name();
+                if(nodename=="channel"){
+                    return child;
                 }
             }
         }
-        return node;
     }
-    catch(const std::exception& ex)
-    {
-        std::cerr << "Exception caught: " << ex.what() << std::endl;
-        node =nullptr;
-        return node;
-    }
+    return nullptr;
 }
 std::string getcontent(const xmlpp::Node* node){
     const auto nodeContent = dynamic_cast<const xmlpp::ContentNode*>(node);
@@ -58,169 +44,207 @@ std::string getcontent(const xmlpp::Node* node){
 }
 std::string parseImmortal(const std::string& xml, const std::string& last)
 {
-    const xmlpp::Node* node = parserss(xml);
     std::string first="";
-    if(node==nullptr)return first;
-    for(const auto& item : node->get_children())
+    try
     {
-        const auto nodename = item->get_name();
-        if(nodename=="item"){
-            std::string title;
-            std::string link;
-            for(const auto& child : item->get_children())
-            {
-                const auto childname = child->get_name();
-                if(childname=="title") {
-                    title=getcontent(child);
-                    if(first=="")first=title;
-                    if(title==last) return first;
+        xmlpp::DomParser parser;
+        parser.parse_memory(xml);
+        const xmlpp::Node* node = getroot(parser);
+        if(node==nullptr)return first;
+        for(const auto& item : node->get_children())
+        {
+            const auto nodename = item->get_name();
+            if(nodename=="item"){
+                std::string title;
+                std::string link;
+                for(const auto& child : item->get_children())
+                {
+                    const auto childname = child->get_name();
+                    if(childname=="title") {
+                        title=getcontent(child);
+                        if(first=="")first=title;
+                        if(title==last) return first;
+                    }
+                    else if(childname=="link"){
+                        link=getcontent(child);
+                    }
                 }
-                else if(childname=="link"){
-                    link=getcontent(child);
+                if(title.find("To You, The Immortal")!=std::string::npos){
+                    std::cout << link << std::endl;
                 }
-            }
-            if(title.find("To You, The Immortal")!=std::string::npos){
-                std::cout << link << std::endl;
             }
         }
+    }
+    catch(const std::exception& ex)
+    {
+        std::cerr << "Exception caught: " << ex.what() << std::endl;
     }
     return first;
 }
 std::string parseblog(const std::string& xml, const std::string& last)
 {
-    const xmlpp::Node* node = parserss(xml);
     std::string first="";
-    if(node==nullptr)return first;
-    for(const auto& item : node->get_children())
+    try
     {
-        const auto nodename = item->get_name();
-        if(nodename=="item" || nodename=="entry"){
-            std::string title;
-            std::string link;
-            for(const auto& child : item->get_children())
-            {
-                const auto childname = child->get_name();
-                if(childname=="title") {
-                    title=getcontent(child);
-                    if(first=="")first=title;
-                    if(title==last) return first;
+        xmlpp::DomParser parser;
+        parser.parse_memory(xml);
+        const xmlpp::Node* node = getroot(parser);
+        if(node==nullptr)return first;
+        for(const auto& item : node->get_children())
+        {
+            const auto nodename = item->get_name();
+            if(nodename=="item" || nodename=="entry"){
+                std::string title;
+                std::string link;
+                for(const auto& child : item->get_children())
+                {
+                    const auto childname = child->get_name();
+                    if(childname=="title") {
+                        title=getcontent(child);
+                        if(first=="")first=title;
+                        if(title==last) return first;
+                    }
+                    else if(childname=="link"){
+                        link=getcontent(child);
+                    }
                 }
-                else if(childname=="link"){
-                    link=getcontent(child);
-                }
+                std::cout << link << std::endl;
             }
-            std::cout << link << std::endl;
         }
+    }
+    catch(const std::exception& ex)
+    {
+        std::cerr << "Exception caught: " << ex.what() << std::endl;
     }
     return first;
 }
 std::string parsepodcast(const std::string& xml, const std::string& last)
 {
-    const xmlpp::Node* node = parserss(xml);
     std::string first="";
-    if(node==nullptr)return first;
-    for(const auto& item : node->get_children())
+    try
     {
-        const auto nodename = item->get_name();
-        if(nodename=="item"){
-            std::string title;
-            std::string link;
-            std::string enclosure="";
-            for(const auto& child : item->get_children())
-            {
-                const auto childname = child->get_name();
-                if(childname=="title") {
-                    title=getcontent(child);
-                    if(first=="")first=title;
-                    if(title==last) return first;
+        xmlpp::DomParser parser;
+        parser.parse_memory(xml);
+        const xmlpp::Node* node = getroot(parser);
+        if(node==nullptr)return first;
+        for(const auto& item : node->get_children())
+        {
+            const auto nodename = item->get_name();
+            if(nodename=="item"){
+                std::string title;
+                std::string link;
+                std::string enclosure="";
+                for(const auto& child : item->get_children())
+                {
+                    const auto childname = child->get_name();
+                    if(childname=="title") {
+                        title=getcontent(child);
+                        if(first=="")first=title;
+                        if(title==last) return first;
+                    }
+                    else if(childname=="link"){
+                        link=getcontent(child);
+                    }
+                    else if(childname=="enclosure"){
+                        link=getcontent(child);
+                    }
                 }
-                else if(childname=="link"){
-                    link=getcontent(child);
-                }
-                else if(childname=="enclosure"){
-                    link=getcontent(child);
-                }
+                std::replace( title.begin(), title.end(), '/', '-');
+                download(link, "~/videos/podcast/"+title+".mp3");
             }
-            std::replace( title.begin(), title.end(), '/', '-');
-            download(link, "~/videos/podcast/"+title+".mp3");
         }
+
+    }
+    catch(const std::exception& ex)
+    {
+        std::cerr << "Exception caught: " << ex.what() << std::endl;
     }
     return first;
 }
 std::time_t parseyoutube(const std::string& xml, std::time_t last, std::string nombre)
 {
-    const xmlpp::Node* node = parserss(xml);
-    if(node==nullptr)return std::time_t(0);
-    std::string command="~/bin/youtube ";
-    std::string output=">> ~/youtube.txt";
-    std::time_t first=last;
-
-    for(const auto& item : node->get_children())
+    try
     {
-        const auto nodename = item->get_name();
-        if(nodename=="entry"){
-            std::string title;
-            std::string link;
-            std::tm t = {};
-            std::time_t time;
-            for(const auto& child : item->get_children())
-            {
-                const auto childname = child->get_name();
-                if(childname=="published"){
-                    std::istringstream ss(getcontent(child));
-                    ss >> std::get_time(&t, "%Y-%m-%dT%H:%M:%S+00:00");
-                    time = mktime(&t);
-                    if(time<=last)return first;
-                    else if(first==last) first=time;
+	xmlpp::DomParser parser;
+	parser.parse_memory(xml);
+	const xmlpp::Node* node = getroot(parser);
+        if(node==nullptr)return std::time_t(0);
+        std::string command="~/bin/youtube ";
+        std::string output=">> ~/youtube.txt";
+        std::time_t first=last;
+
+        for(const auto& item : node->get_children())
+        {
+            const auto nodename = item->get_name();
+            if(nodename=="entry"){
+                std::string title;
+                std::string link;
+                std::tm t = {};
+                std::time_t time;
+                for(const auto& child : item->get_children())
+                {
+                    const auto childname = child->get_name();
+                    if(childname=="published"){
+                        std::istringstream ss(getcontent(child));
+                        ss >> std::get_time(&t, "%Y-%m-%dT%H:%M:%S+00:00");
+                        time = mktime(&t);
+                        if(time<=last)return first;
+                        else if(first==last) first=time;
+                    }
+                    else if(childname=="title") {
+                        title=getcontent(child);
+                    }
+                    else if(childname=="link"){
+                        link=getcontent(child);
+                    }
                 }
-                else if(childname=="title") {
-                    title=getcontent(child);
+                if(nombre=="alexelcapo"){
+                    if(title.find("ENELSMADLH")!=std::string::npos)system((command+link+" resto"+output).c_str());
                 }
-                else if(childname=="link"){
-                    link=getcontent(child);
+                else if(nombre=="Adult Swim"){
+                    if(title.find("Off the Air")!=std::string::npos)system((command+link+" ver"+output).c_str());
                 }
-            }
-            if(nombre=="alexelcapo"){
-                if(title.find("ENELSMADLH")!=std::string::npos)system((command+link+" resto"+output).c_str());
-            }
-            else if(nombre=="Adult Swim"){
-                if(title.find("Off the Air")!=std::string::npos)system((command+link+" ver"+output).c_str());
-            }
-            else if(nombre=="Pazos64"){
-                if(title.find("Incluso de Videojuegos")==std::string::npos)system((command+link+" ver"+output).c_str());
-            }
-            else if(nombre=="Accursed Farms"){
-                if(title.find("Videochat")==std::string::npos)system((command+link+" ver"+output).c_str());
-            }
-            else if(nombre=="Cinemassacre"){
-                if(title.find("Angry Video Game Nerd")!=std::string::npos)system((command+link+" ver"+output).c_str());
-            }
-            else if(nombre=="The Majority Report w/ Sam Seder"){
-                if(title.find("MR ")==std::string::npos)system((command+link+" podcast"+output).c_str());
-            }
-            else if(nombre=="The Michael Brooks Show"){
-                if(title.find("TMBS -")==std::string::npos)system((command+link+" podcast"+output).c_str());
-            }
-            else if(nombre=="FilmJoy"){
-                if(title.find("Movies with Mikey")!=std::string::npos)system((command+link+" ver"+output).c_str());
-            }
-            else if(nombre=="ElRichMC - Minecraft & Gaming a otro nivel"){
-                if(title.find("Minecraft Review")!=std::string::npos)system((command+link+" ver"+output).c_str());
-                else if(title.find("Hardcore Flatlands")!=std::string::npos)system((command+link+" ver"+output).c_str());
-                else if(title.find("Survival 1.7")!=std::string::npos)system((command+link+" ver"+output).c_str());
-            }
-            else if(nombre=="LowkoTV"){
-                if(title.find("StarCraft")!=std::string::npos)system((command+link+" ver"+output).c_str());
-            }
-            else if(nombre=="Escapist"){
-                if(title.find("The Big Picture")!=std::string::npos)system((command+link+" ver"+output).c_str());
-                else if(title.find("Zero Punctuation")!=std::string::npos)system((command+link+" ver"+output).c_str());
-                else if(title.find("Yahtzee's Dev Diary")!=std::string::npos)system((command+link+" ver"+output).c_str());
-            }
-            else{
-                system((command+link+output).c_str());
+                else if(nombre=="Pazos64"){
+                    if(title.find("Incluso de Videojuegos")==std::string::npos)system((command+link+" ver"+output).c_str());
+                }
+                else if(nombre=="Accursed Farms"){
+                    if(title.find("Videochat")==std::string::npos)system((command+link+" ver"+output).c_str());
+                }
+                else if(nombre=="Cinemassacre"){
+                    if(title.find("Angry Video Game Nerd")!=std::string::npos)system((command+link+" ver"+output).c_str());
+                }
+                else if(nombre=="The Majority Report w/ Sam Seder"){
+                    if(title.find("MR ")==std::string::npos)system((command+link+" podcast"+output).c_str());
+                }
+                else if(nombre=="The Michael Brooks Show"){
+                    if(title.find("TMBS -")==std::string::npos)system((command+link+" podcast"+output).c_str());
+                }
+                else if(nombre=="FilmJoy"){
+                    if(title.find("Movies with Mikey")!=std::string::npos)system((command+link+" ver"+output).c_str());
+                }
+                else if(nombre=="ElRichMC - Minecraft & Gaming a otro nivel"){
+                    if(title.find("Minecraft Review")!=std::string::npos)system((command+link+" ver"+output).c_str());
+                    else if(title.find("Hardcore Flatlands")!=std::string::npos)system((command+link+" ver"+output).c_str());
+                    else if(title.find("Survival 1.7")!=std::string::npos)system((command+link+" ver"+output).c_str());
+                }
+                else if(nombre=="LowkoTV"){
+                    if(title.find("StarCraft")!=std::string::npos)system((command+link+" ver"+output).c_str());
+                }
+                else if(nombre=="Escapist"){
+                    if(title.find("The Big Picture")!=std::string::npos)system((command+link+" ver"+output).c_str());
+                    else if(title.find("Zero Punctuation")!=std::string::npos)system((command+link+" ver"+output).c_str());
+                    else if(title.find("Yahtzee's Dev Diary")!=std::string::npos)system((command+link+" ver"+output).c_str());
+                }
+                else{
+                    system((command+link+output).c_str());
+                }
             }
         }
+
+    }
+    catch(const std::exception& ex)
+    {
+        std::cerr << "Exception caught: " << ex.what() << std::endl;
     }
     return std::time_t(0);
 }
