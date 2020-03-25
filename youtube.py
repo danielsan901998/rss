@@ -2,7 +2,6 @@
 import youtube_dl
 import sys
 import os
-import glob
 args=len(sys.argv)
 if(args>1):
     folder=""
@@ -11,15 +10,20 @@ if(args>1):
         folder=sys.argv[2]
         folder=folder+'/'
     default = {
-            'format': 'best',  # choice of quality
-            'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',         # name the file the ID of the video
-            'quiet': True,
-            }
-    ydl1 = youtube_dl.YoutubeDL(default)
-    try:
-        ydl1.download([link])
-    except:
-        print("download error "+link)
-        files=glob.glob('~/videos/'+folder+"*.mp4.part")
-        for part in files:
-            os.remove(part)
+        'format': 'best',  # choice of quality
+        'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',         # name the file the ID of the video
+        'quiet':True,
+    }
+    ydl = youtube_dl.YoutubeDL(default)
+    result = ydl.extract_info(link , download=False)
+    if(result["is_live"]):
+        with open("C:\\Users\\danig\\AppData\\Local\\Temp\\youtube.txt", "a") as myfile:
+            myfile.write(link+"\n")
+        print("directo "+link)
+    else:
+        try:
+            ydl.download([link])
+        except:
+            print("download error "+link)
+            filename = ydl.prepare_filename(result)
+            os.remove(filename+".part")
