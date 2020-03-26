@@ -18,8 +18,6 @@ if(args>1):
     try:
         result = ydl.extract_info(link , download=False)
         if(result["is_live"]):
-            with open("C:\\Users\\danig\\AppData\\Local\\Temp\\youtube.txt", "a") as myfile:
-                myfile.write(link+"\n")
             print("directo "+link)
         else:
             try:
