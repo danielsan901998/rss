@@ -18,7 +18,7 @@ if(args>1):
     try:
         result = ydl.extract_info(link , download=False)
         if(result["is_live"]):
-            print("directo "+link)
+            print("is live "+link)
         else:
             try:
                 ydl.download([link])
@@ -27,4 +27,4 @@ if(args>1):
                 filename = ydl.prepare_filename(result)
                 os.remove(filename+".part")
     except:
-        pass
+        print("uknow error")
