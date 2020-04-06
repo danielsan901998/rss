@@ -161,7 +161,7 @@ std::string parsepodcast(const std::string& xml, const std::string& last)
     }
     return first;
 }
-std::time_t parseyoutube(const std::string& xml, std::time_t last, std::string nombre)
+std::time_t parseyoutube(const std::string& xml, std::time_t last, std::string nombre,const bsoncxx::v_noabi::document::view& doc )
 {
     try
     {
@@ -172,6 +172,17 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last, std::string n
         std::string command="~/bin/youtube ";
         std::string output=">> ~/youtube.txt";
         std::time_t first=last;
+        std::vector<std::string> contain;
+        std::vector<std::string> notcontain;
+        if(doc["regex"]){
+            bsoncxx::document::element reg = doc["regex"];
+            if(reg["true"])for (const bsoncxx::array::element& msg : reg["true"].get_array().value) {
+                contain.push_back(msg.get_utf8().value.to_string());
+            }
+            else if(reg["false"])for (const bsoncxx::array::element& msg : reg["false"].get_array().value) {
+                notcontain.push_back(msg.get_utf8().value.to_string());
+            }
+        }
 
         for(const auto& item : node->get_children())
         {
@@ -198,42 +209,15 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last, std::string n
                         link=getcontent(child);
                     }
                 }
-                if(nombre=="alexelcapo"){
-                    if(title.find("ENELSMADLH")!=std::string::npos)system((command+link+" resto"+output).c_str());
+                if(contain.size()!=0){
+                    for(std::string& regex: contain) 
+                        if(title.find(regex)!=std::string::npos)system((command+link+" resto"+output).c_str());
                 }
-                else if(nombre=="Adult Swim"){
-                    if(title.find("Off the Air")!=std::string::npos)system((command+link+" ver"+output).c_str());
-                }
-                else if(nombre=="Pazos64"){
-                    if(title.find("Incluso de Videojuegos")==std::string::npos)system((command+link+" ver"+output).c_str());
-                }
-                else if(nombre=="Accursed Farms"){
-                    if(title.find("Videochat")==std::string::npos)system((command+link+" ver"+output).c_str());
-                }
-                else if(nombre=="Cinemassacre"){
-                    if(title.find("Angry Video Game Nerd")!=std::string::npos)system((command+link+" ver"+output).c_str());
-                }
-                else if(nombre=="The Majority Report w/ Sam Seder"){
-                    if(title.find("MR ")==std::string::npos)system((command+link+" podcast"+output).c_str());
-                }
-                else if(nombre=="The Michael Brooks Show"){
-                    if(title.find("TMBS -")==std::string::npos)system((command+link+" podcast"+output).c_str());
-                }
-                else if(nombre=="FilmJoy"){
-                    if(title.find("Movies with Mikey")!=std::string::npos)system((command+link+" ver"+output).c_str());
-                }
-                else if(nombre=="ElRichMC - Minecraft & Gaming a otro nivel"){
-                    if(title.find("Minecraft Review")!=std::string::npos)system((command+link+" ver"+output).c_str());
-                    else if(title.find("Hardcore Flatlands")!=std::string::npos)system((command+link+" ver"+output).c_str());
-                    else if(title.find("Survival 1.7")!=std::string::npos)system((command+link+" ver"+output).c_str());
-                }
-                else if(nombre=="LowkoTV"){
-                    if(title.find("StarCraft")!=std::string::npos)system((command+link+" ver"+output).c_str());
-                }
-                else if(nombre=="Escapist"){
-                    if(title.find("The Big Picture")!=std::string::npos)system((command+link+" ver"+output).c_str());
-                    else if(title.find("Zero Punctuation")!=std::string::npos)system((command+link+" ver"+output).c_str());
-                    else if(title.find("Yahtzee's Dev Diary")!=std::string::npos)system((command+link+" ver"+output).c_str());
+                else if(notcontain.size()!=0){
+                    bool descargar=true;
+                    for(std::string& regex: notcontain) 
+                        if(title.find(regex)!=std::string::npos)descargar==false;
+                    if(descargar)system((command+link+" resto"+output).c_str());
                 }
                 else{
                     system((command+link+output).c_str());

@@ -27,4 +27,4 @@ void download(const std::string& string, const std::string& filename);
 std::string parseImmortal(const std::string& xml, const std::string& last);
 std::string parseblog(const std::string& xml, const std::string& last);
 std::string parsepodcast(const std::string& xml, const std::string& last);
-std::time_t parseyoutube(const std::string& xml, std::time_t last, std::string nombre);
+std::time_t parseyoutube(const std::string& xml, std::time_t last, std::string nombre, const bsoncxx::v_noabi::document::view& doc);
