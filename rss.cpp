@@ -15,20 +15,26 @@ int main(int argc, char* argv[]){
         if(blog == "Así habló Cicerón") {
             std::string xml=request(doc["url"].get_utf8().value.to_string());
             last=parseblog(xml, articulo);
-            col.update_one(bsoncxx::builder::stream::document{} << "blog" << blog << bsoncxx::builder::stream::finalize,
-               bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "articulo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
+            if(!last.empty() && last!=articulo){
+                col.update_one(bsoncxx::builder::stream::document{} << "blog" << blog << bsoncxx::builder::stream::finalize,  
+                        bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "articulo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);  
+            }
         }
         else if(blog == "To You, the Immortal") {
             std::string xml=request(doc["url"].get_utf8().value.to_string());
             last=parseImmortal(xml, articulo);
-            col.update_one(bsoncxx::builder::stream::document{} << "blog" << blog << bsoncxx::builder::stream::finalize,
-               bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "articulo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
+            if(!last.empty() && last!=articulo){
+                col.update_one(bsoncxx::builder::stream::document{} << "blog" << blog << bsoncxx::builder::stream::finalize,  
+                        bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "articulo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);  
+            }
         }
         else {
             std::string xml=request(doc["url"].get_utf8().value.to_string(),"curl");
             last=parseblog(xml, articulo);
-            col.update_one(bsoncxx::builder::stream::document{} << "blog" << blog << bsoncxx::builder::stream::finalize,
-               bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "articulo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
+            if(!last.empty() && last!=articulo){
+                col.update_one(bsoncxx::builder::stream::document{} << "blog" << blog << bsoncxx::builder::stream::finalize,  
+                        bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "articulo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);  
+            }
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
@@ -40,8 +46,10 @@ int main(int argc, char* argv[]){
         std::string articulo= doc["ultimo"].get_utf8().value.to_string();
         std::string xml=request(doc["url"].get_utf8().value.to_string(),"curl");
         std::string last=parsepodcast(xml, articulo);
-        col.update_one(bsoncxx::builder::stream::document{} << "nombre" << podcast << bsoncxx::builder::stream::finalize,
-               bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "ultimo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
+        if(!last.empty() && last!=articulo){
+            col.update_one(bsoncxx::builder::stream::document{} << "nombre" << podcast << bsoncxx::builder::stream::finalize,
+                    bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "ultimo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
+        }
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
@@ -64,7 +72,7 @@ int main(int argc, char* argv[]){
                 std::chrono::system_clock::from_time_t(last)
             };
             col.update_one(bsoncxx::builder::stream::document{}<<"hora"<<bsoncxx::builder::stream::open_document <<"$exists"<<true<<bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize,
-               bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "hora" << doc << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
+                    bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "hora" << doc << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
         }
     }
 }
