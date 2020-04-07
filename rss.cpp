@@ -67,4 +67,5 @@ int main(int argc, char* argv[]){
                     bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "hora" << doc << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
         }
     }
+    return 0;
 }
