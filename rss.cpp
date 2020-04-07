@@ -55,6 +55,8 @@ int main(int argc, char* argv[]){
             bsoncxx::types::b_date doc=bsoncxx::types::b_date{
                 std::chrono::system_clock::from_time_t(last)
             };
+            col.update_one(bsoncxx::builder::stream::document{}<<"hora"<<bsoncxx::builder::stream::open_document <<"$exists"<<true<<bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize,
+               bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "hora" << doc << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
         }
     }
 }
