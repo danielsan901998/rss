@@ -7,7 +7,6 @@ int main(int argc, char* argv[]){
 
     auto col = conn["database"]["blogs"];
     auto cursor = col.find({});
-
     for (auto&& doc : cursor) {
         std::string blog= doc["blog"].get_utf8().value.to_string();
         std::string articulo= doc["articulo"].get_utf8().value.to_string();
@@ -30,9 +29,9 @@ int main(int argc, char* argv[]){
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
+
     col = conn["database"]["podcast"];
     cursor = col.find({});
-
     for (auto&& doc : cursor) {
         std::string podcast= doc["nombre"].get_utf8().value.to_string();
         std::string articulo= doc["ultimo"].get_utf8().value.to_string();
