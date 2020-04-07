@@ -27,4 +27,4 @@ if(args>1):
                 filename = ydl.prepare_filename(result)
                 os.remove(filename+".part")
     except:
-        print("uknow error")
+        print("unknown error"+link)

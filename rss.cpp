@@ -3,7 +3,7 @@
 int main(int argc, char* argv[]){
     std::locale::global(std::locale(""));
     mongocxx::instance inst{};
-    mongocxx::client conn{mongocxx::uri{"mongodb://admin:ordenador@127.0.0.1:27017"}};
+    mongocxx::client conn{mongocxx::uri{}};
 
     auto col = conn["database"]["blogs"];
     auto cursor = col.find({});
@@ -52,7 +52,6 @@ int main(int argc, char* argv[]){
             if(time>last)last=time;
         }
         if(last!=date){
-            std::cout << std::asctime(std::localtime(&last)) << std::endl;
             bsoncxx::types::b_date doc=bsoncxx::types::b_date{
                 std::chrono::system_clock::from_time_t(last)
             };
