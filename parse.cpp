@@ -171,6 +171,7 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last, std::string n
         if(node==nullptr)return std::time_t(0);
         std::string command="~/bin/youtube ";
         std::string output=">> ~/youtube.txt";
+        std::string folder="";
         std::time_t first=last;
         std::vector<std::string> contain;
         std::vector<std::string> notcontain;
@@ -182,6 +183,9 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last, std::string n
             else if(reg["false"])for (const bsoncxx::array::element& msg : reg["false"].get_array().value) {
                 notcontain.push_back(msg.get_utf8().value.to_string());
             }
+        }
+        if(doc["folder"]){
+            folder=doc["folder"].get_utf8().value.to_string();
         }
 
         for(const auto& item : node->get_children())
@@ -209,22 +213,21 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last, std::string n
                         link=getcontent(child);
                     }
                 }
+                bool descargar=false;
                 if(contain.size()!=0){
                     for(std::string& regex: contain) 
-                        if(title.find(regex)!=std::string::npos)system((command+link+" resto"+output).c_str());
+                        if(title.find(regex)!=std::string::npos)descargar=true;
                 }
                 else if(notcontain.size()!=0){
-                    bool descargar=true;
+                    descargar=true;
                     for(std::string& regex: notcontain) 
                         if(title.find(regex)!=std::string::npos)descargar==false;
-                    if(descargar)system((command+link+" resto"+output).c_str());
                 }
-                else{
-                    system((command+link+output).c_str());
+                if(descargar){
+                    system((command+link+" "+folder+output).c_str());
                 }
             }
         }
-
     }
     catch(const std::exception& ex)
     {
