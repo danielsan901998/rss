@@ -213,15 +213,15 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last, std::string n
                         link=getcontent(child);
                     }
                 }
-                bool descargar=false;
+                bool descargar=true;
                 if(contain.size()!=0){
+                    descargar=false;
                     for(std::string& regex: contain) 
                         if(title.find(regex)!=std::string::npos)descargar=true;
                 }
                 else if(notcontain.size()!=0){
-                    descargar=true;
                     for(std::string& regex: notcontain) 
-                        if(title.find(regex)!=std::string::npos)descargar==false;
+                        if(title.find(regex)!=std::string::npos)descargar=false;
                 }
                 if(descargar){
                     system((command+link+" "+folder+output).c_str());
