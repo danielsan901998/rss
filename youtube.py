@@ -1,9 +1,9 @@
 #!/usr/bin/python3
-import youtube_dl
 import sys
 import os
 args=len(sys.argv)
 if(args>1):
+    import youtube_dl
     folder=""
     link=sys.argv[1]
     if(args>2):
