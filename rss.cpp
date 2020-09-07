@@ -11,16 +11,11 @@ int main(int argc, char* argv[]){
         std::string blog= doc["blog"].get_utf8().value.to_string();
         std::string articulo= doc["articulo"].get_utf8().value.to_string();
         std::string last;
-        if(blog == "Así habló Cicerón") {
-            std::string xml=request(doc["url"].get_utf8().value.to_string());
-            last=parseblog(xml, articulo);
-        }
-        else if(blog == "To You, the Immortal") {
-            std::string xml=request(doc["url"].get_utf8().value.to_string());
-            last=parseImmortal(xml, articulo);
+        std::string xml=request(doc["url"].get_utf8().value.to_string());
+        if(doc["contain"]) {
+            last=parseblog(xml, articulo, doc["contain"].get_utf8().value.to_string());
         }
         else {
-            std::string xml=request(doc["url"].get_utf8().value.to_string(),"curl");
             last=parseblog(xml, articulo);
         }
         if(!last.empty() && last!=articulo){
@@ -35,7 +30,7 @@ int main(int argc, char* argv[]){
     for (auto&& doc : cursor) {
         std::string podcast= doc["nombre"].get_utf8().value.to_string();
         std::string articulo= doc["ultimo"].get_utf8().value.to_string();
-        std::string xml=request(doc["url"].get_utf8().value.to_string(),"curl");
+        std::string xml=request(doc["url"].get_utf8().value.to_string());
         std::string last=parsepodcast(xml, articulo);
         if(!last.empty() && last!=articulo){
             col.update_one(bsoncxx::builder::stream::document{} << "nombre" << podcast << bsoncxx::builder::stream::finalize,

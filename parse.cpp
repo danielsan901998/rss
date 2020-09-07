@@ -42,7 +42,7 @@ std::string getcontent(const xmlpp::Node* node){
     }
     return "";
 }
-std::string parseImmortal(const std::string& xml, const std::string& last)
+std::string parseblog(const std::string& xml, const std::string& last, const std::string& contain)
 {
     std::string first="";
     try
@@ -69,7 +69,7 @@ std::string parseImmortal(const std::string& xml, const std::string& last)
                         link=getcontent(child);
                     }
                 }
-                if(title.find("To You, The Immortal")!=std::string::npos){
+                if(title.find(contain)!=std::string::npos){
                     std::cout << link << std::endl;
                 }
             }
