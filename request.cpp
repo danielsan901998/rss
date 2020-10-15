@@ -12,6 +12,10 @@ std::string request(const std::string& string)
         myRequest.setOpt<curlpp::options::UserAgent>("curl");
         myRequest.setOpt<curlpp::options::WriteStream>(&os);
         myRequest.perform();
+        long code = curlpp::infos::ResponseCode::get(myRequest);
+        if(code==404){
+            return "";
+        }
         return os.str();
     }
 
