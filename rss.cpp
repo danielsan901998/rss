@@ -20,7 +20,7 @@ int main(int argc, char* argv[]){
                 last=parseblog(xml, articulo, doc["contain"].get_utf8().value.to_string());
             }
             else {
-                last=parseblog(xml, articulo);
+                last=parseblog(xml, articulo, "");
             }
             if(!last.empty() && last!=articulo){
                 col.update_one(bsoncxx::builder::stream::document{} << "blog" << blog << bsoncxx::builder::stream::finalize,  

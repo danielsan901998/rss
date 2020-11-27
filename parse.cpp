@@ -54,45 +54,6 @@ std::string parseblog(const std::string& xml, const std::string& last, const std
         for(const auto& item : node->get_children())
         {
             const auto nodename = item->get_name();
-            if(nodename=="item"){
-                std::string title;
-                std::string link;
-                for(const auto& child : item->get_children())
-                {
-                    const auto childname = child->get_name();
-                    if(childname=="title") {
-                        title=getcontent(child);
-                        if(first=="")first=title;
-                        if(title==last) return first;
-                    }
-                    else if(childname=="link"){
-                        link=getcontent(child);
-                    }
-                }
-                if(title.find(contain)!=std::string::npos){
-                    std::cout << link << std::endl;
-                }
-            }
-        }
-    }
-    catch(const std::exception& ex)
-    {
-        std::cerr << "Exception caught: " << ex.what() << std::endl;
-    }
-    return first;
-}
-std::string parseblog(const std::string& xml, const std::string& last)
-{
-    std::string first="";
-    try
-    {
-        xmlpp::DomParser parser;
-        parser.parse_memory(xml);
-        const xmlpp::Node* node = getroot(parser);
-        if(node==nullptr)return first;
-        for(const auto& item : node->get_children())
-        {
-            const auto nodename = item->get_name();
             if(nodename=="item" || nodename=="entry"){
                 std::string title;
                 std::string link;
@@ -108,7 +69,9 @@ std::string parseblog(const std::string& xml, const std::string& last)
                         link=getcontent(child);
                     }
                 }
-                std::cout << link << std::endl;
+                if(contain=="" || title.find(contain)!=std::string::npos){
+                    std::cout << link << std::endl;
+                }
             }
         }
     }
@@ -170,7 +133,7 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last, std::string n
 	const xmlpp::Node* node = getroot(parser);
         if(node==nullptr)return std::time_t(0);
         std::string command="~/bin/youtube ";
-        std::string output=">> ~/youtube.txt";
+        std::string output=">> ~/youtube.log";
         std::string folder="";
         std::time_t first=last;
         std::vector<std::string> contain;
