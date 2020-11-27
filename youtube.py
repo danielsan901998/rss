@@ -10,7 +10,7 @@ if(args>1):
         folder=sys.argv[2]
         folder=folder+'/'
     default = {
-        'format': 'best',  # choice of quality
+        'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4',  # choice of quality
         'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',         # name the file the ID of the video
         'quiet':True,
     }
