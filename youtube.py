@@ -32,4 +32,4 @@ try:
                 filename = ydl.prepare_filename(result)
                 os.remove(filename+".part")
 except:
-    print("unknown error "+",".join(args.urls))
+    print("unknown error "+" ".join(args.urls))
