@@ -132,13 +132,13 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last, std::string n
 	parser.parse_memory(xml);
 	const xmlpp::Node* node = getroot(parser);
         if(node==nullptr)return std::time_t(0);
-        std::string command="~/bin/youtube ";
+        std::string command="~/bin/youtube";
         std::string output=">> ~/youtube.log";
         std::string folder="";
         std::time_t first=last;
         std::vector<std::string> contain;
         std::vector<std::string> notcontain;
-        std::string urls;
+        std::string urls="";
         if(doc["regex"]){
             bsoncxx::document::element reg = doc["regex"];
             if(reg["true"])for (const bsoncxx::array::element& msg : reg["true"].get_array().value) {
@@ -149,7 +149,7 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last, std::string n
             }
         }
         if(doc["folder"]){
-            folder=doc["folder"].get_utf8().value.to_string();
+            folder=" -f "+doc["folder"].get_utf8().value.to_string();
         }
 
         for(const auto& item : node->get_children())
@@ -188,11 +188,11 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last, std::string n
                         if(title.find(regex)!=std::string::npos)descargar=false;
                 }
                 if(descargar){
-                    urls+=link;
+                    urls+=" "+link;
                 }
             }
         }
-        system((command+urls+" -f "+folder+output).c_str());
+        system((command+urls+folder+output).c_str());
     }
     catch(const std::exception& ex)
     {
