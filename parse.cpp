@@ -192,7 +192,7 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last, std::string n
                 }
             }
         }
-        system((command+link+" -f "+folder+output).c_str());
+        system((command+urls+" -f "+folder+output).c_str());
     }
     catch(const std::exception& ex)
     {
