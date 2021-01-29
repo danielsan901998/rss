@@ -124,13 +124,13 @@ std::string parsepodcast(const std::string& xml, const std::string& last)
     }
     return first;
 }
-std::time_t parseyoutube(const std::string& xml, std::time_t last, std::string nombre,const bsoncxx::v_noabi::document::view& doc )
+std::time_t parseyoutube(const std::string& xml, std::time_t last,const bsoncxx::v_noabi::document::view& doc )
 {
     try
     {
-	xmlpp::DomParser parser;
-	parser.parse_memory(xml);
-	const xmlpp::Node* node = getroot(parser);
+        xmlpp::DomParser parser;
+        parser.parse_memory(xml);
+        const xmlpp::Node* node = getroot(parser);
         if(node==nullptr)return std::time_t(0);
         std::string command="~/bin/youtube";
         std::string output=">> ~/youtube.log";
@@ -167,7 +167,13 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last, std::string n
                         std::istringstream ss(getcontent(child));
                         ss >> std::get_time(&t, "%Y-%m-%dT%H:%M:%S+00:00");
                         time = mktime(&t);
-                        if(time<=last)return first;
+                        if(time<=last)
+                        {
+                            if(urls!=""){
+                                system((command+urls+folder+output).c_str());
+                            }
+                            return first;
+                        }
                         else if(first==last) first=time;
                     }
                     else if(childname=="title") {
@@ -188,11 +194,11 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last, std::string n
                         if(title.find(regex)!=std::string::npos)descargar=false;
                 }
                 if(descargar){
-                    urls+=" "+link;
+                    urls+=" ";
+                    urls+=link;
                 }
             }
         }
-        system((command+urls+folder+output).c_str());
     }
     catch(const std::exception& ex)
     {

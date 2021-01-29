@@ -56,7 +56,6 @@ int main(int argc, char* argv[]){
         std::time_t date = std::chrono::system_clock::to_time_t(hora.get_date());
         std::time_t last=date;
         cursor = col.find(bsoncxx::builder::stream::document{}<<"descargar"<<true<<bsoncxx::builder::stream::finalize);
-
         for (auto&& doc : cursor) {
             std::string nombre=doc["nombre"].get_utf8().value.to_string();
             std::string xml=request("https://www.youtube.com/feeds/videos.xml?channel_id="+doc["id"].get_utf8().value.to_string());
@@ -64,7 +63,7 @@ int main(int argc, char* argv[]){
                 std::cout << nombre << " not found"<< std::endl;
             }
             else{
-                std::time_t time=parseyoutube(xml,last,nombre,doc);
+                std::time_t time=parseyoutube(xml,last,doc);
                 if(time>last)last=time;
             }
         }
