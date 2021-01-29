@@ -138,6 +138,7 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last, std::string n
         std::time_t first=last;
         std::vector<std::string> contain;
         std::vector<std::string> notcontain;
+        std::string urls;
         if(doc["regex"]){
             bsoncxx::document::element reg = doc["regex"];
             if(reg["true"])for (const bsoncxx::array::element& msg : reg["true"].get_array().value) {
@@ -187,10 +188,11 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last, std::string n
                         if(title.find(regex)!=std::string::npos)descargar=false;
                 }
                 if(descargar){
-                    system((command+link+" "+folder+output).c_str());
+                    urls+=link;
                 }
             }
         }
+        system((command+link+" -f "+folder+output).c_str());
     }
     catch(const std::exception& ex)
     {
