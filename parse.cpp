@@ -42,46 +42,7 @@ std::string getcontent(const xmlpp::Node* node){
     }
     return "";
 }
-std::string parseImmortal(const std::string& xml, const std::string& last)
-{
-    std::string first="";
-    try
-    {
-        xmlpp::DomParser parser;
-        parser.parse_memory(xml);
-        const xmlpp::Node* node = getroot(parser);
-        if(node==nullptr)return first;
-        for(const auto& item : node->get_children())
-        {
-            const auto nodename = item->get_name();
-            if(nodename=="item"){
-                std::string title;
-                std::string link;
-                for(const auto& child : item->get_children())
-                {
-                    const auto childname = child->get_name();
-                    if(childname=="title") {
-                        title=getcontent(child);
-                        if(first=="")first=title;
-                        if(title==last) return first;
-                    }
-                    else if(childname=="link"){
-                        link=getcontent(child);
-                    }
-                }
-                if(title.find("To You, The Immortal")!=std::string::npos){
-                    std::cout << link << std::endl;
-                }
-            }
-        }
-    }
-    catch(const std::exception& ex)
-    {
-        std::cerr << "Exception caught: " << ex.what() << std::endl;
-    }
-    return first;
-}
-std::string parseblog(const std::string& xml, const std::string& last)
+std::string parseblog(const std::string& xml, const std::string& last, const std::string& contain)
 {
     std::string first="";
     try
@@ -108,7 +69,9 @@ std::string parseblog(const std::string& xml, const std::string& last)
                         link=getcontent(child);
                     }
                 }
-                std::cout << link << std::endl;
+                if(contain=="" || title.find(contain)!=std::string::npos){
+                    std::cout << link << std::endl;
+                }
             }
         }
     }
@@ -170,7 +133,8 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last, std::string n
 	const xmlpp::Node* node = getroot(parser);
         if(node==nullptr)return std::time_t(0);
         std::string command="~/bin/youtube ";
-        std::string output=">> ~/youtube.txt";
+        std::string output=">> ~/youtube.log";
+        std::string folder="";
         std::time_t first=last;
         std::vector<std::string> contain;
         std::vector<std::string> notcontain;
@@ -182,6 +146,9 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last, std::string n
             else if(reg["false"])for (const bsoncxx::array::element& msg : reg["false"].get_array().value) {
                 notcontain.push_back(msg.get_utf8().value.to_string());
             }
+        }
+        if(doc["folder"]){
+            folder=doc["folder"].get_utf8().value.to_string();
         }
 
         for(const auto& item : node->get_children())
@@ -209,22 +176,21 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last, std::string n
                         link=getcontent(child);
                     }
                 }
+                bool descargar=true;
                 if(contain.size()!=0){
+                    descargar=false;
                     for(std::string& regex: contain) 
-                        if(title.find(regex)!=std::string::npos)system((command+link+" resto"+output).c_str());
+                        if(title.find(regex)!=std::string::npos)descargar=true;
                 }
                 else if(notcontain.size()!=0){
-                    bool descargar=true;
                     for(std::string& regex: notcontain) 
-                        if(title.find(regex)!=std::string::npos)descargar==false;
-                    if(descargar)system((command+link+" resto"+output).c_str());
+                        if(title.find(regex)!=std::string::npos)descargar=false;
                 }
-                else{
-                    system((command+link+output).c_str());
+                if(descargar){
+                    system((command+link+" "+folder+output).c_str());
                 }
             }
         }
-
     }
     catch(const std::exception& ex)
     {

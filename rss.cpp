@@ -11,21 +11,21 @@ int main(int argc, char* argv[]){
         std::string blog= doc["blog"].get_utf8().value.to_string();
         std::string articulo= doc["articulo"].get_utf8().value.to_string();
         std::string last;
-        if(blog == "Así habló Cicerón") {
-            std::string xml=request(doc["url"].get_utf8().value.to_string());
-            last=parseblog(xml, articulo);
+        std::string xml=request(doc["url"].get_utf8().value.to_string());
+        if(xml==""){
+            std::cout << blog << " not found"<< std::endl;
         }
-        else if(blog == "To You, the Immortal") {
-            std::string xml=request(doc["url"].get_utf8().value.to_string());
-            last=parseImmortal(xml, articulo);
-        }
-        else {
-            std::string xml=request(doc["url"].get_utf8().value.to_string(),"curl");
-            last=parseblog(xml, articulo);
-        }
-        if(!last.empty() && last!=articulo){
-            col.update_one(bsoncxx::builder::stream::document{} << "blog" << blog << bsoncxx::builder::stream::finalize,  
-                    bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "articulo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);  
+        else{
+            if(doc["contain"]) {
+                last=parseblog(xml, articulo, doc["contain"].get_utf8().value.to_string());
+            }
+            else {
+                last=parseblog(xml, articulo, "");
+            }
+            if(!last.empty() && last!=articulo){
+                col.update_one(bsoncxx::builder::stream::document{} << "blog" << blog << bsoncxx::builder::stream::finalize,  
+                        bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "articulo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);  
+            }
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
@@ -35,11 +35,16 @@ int main(int argc, char* argv[]){
     for (auto&& doc : cursor) {
         std::string podcast= doc["nombre"].get_utf8().value.to_string();
         std::string articulo= doc["ultimo"].get_utf8().value.to_string();
-        std::string xml=request(doc["url"].get_utf8().value.to_string(),"curl");
-        std::string last=parsepodcast(xml, articulo);
-        if(!last.empty() && last!=articulo){
-            col.update_one(bsoncxx::builder::stream::document{} << "nombre" << podcast << bsoncxx::builder::stream::finalize,
-                    bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "ultimo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
+        std::string xml=request(doc["url"].get_utf8().value.to_string());
+        if(xml==""){
+            std::cout << podcast << " not found"<< std::endl;
+        }
+        else{
+            std::string last=parsepodcast(xml, articulo);
+            if(!last.empty() && last!=articulo){
+                col.update_one(bsoncxx::builder::stream::document{} << "nombre" << podcast << bsoncxx::builder::stream::finalize,
+                        bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "ultimo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
+            }
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
@@ -55,8 +60,13 @@ int main(int argc, char* argv[]){
         for (auto&& doc : cursor) {
             std::string nombre=doc["nombre"].get_utf8().value.to_string();
             std::string xml=request("https://www.youtube.com/feeds/videos.xml?channel_id="+doc["id"].get_utf8().value.to_string());
-            std::time_t time=parseyoutube(xml,last,nombre,doc);
-            if(time>last)last=time;
+            if(xml==""){
+                std::cout << nombre << " not found"<< std::endl;
+            }
+            else{
+                std::time_t time=parseyoutube(xml,last,nombre,doc);
+                if(time>last)last=time;
+            }
         }
         if(last!=date){
             bsoncxx::types::b_date doc=bsoncxx::types::b_date{
