@@ -2,8 +2,15 @@
 import youtube_dl
 import sys
 import os
-args=len(sys.argv)
-if(args>1):
+import argparse
+parser = argparse.ArgumentParser(description='process url')
+parser.add_argument('urls', nargs='+', help='videos to download')
+parser.add_argument('-f',"--folder", dest="folder", help='folder')
+
+args=parser.parse_args()
+if args.folder:
+    print("folder: "+args.folder)
+print("urls: "+",".join(args.urls))
     folder=""
     link=sys.argv[1]
     if(args>2):
@@ -16,15 +23,16 @@ if(args>1):
     }
     ydl = youtube_dl.YoutubeDL(default)
     try:
-        result = ydl.extract_info(link , download=False)
-        if(result["is_live"]):
-            print("is live "+link)
-        else:
-            try:
-                ydl.download([link])
-            except:
-                print("download error "+link)
-                filename = ydl.prepare_filename(result)
-                os.remove(filename+".part")
+        for link in args.urls:
+            result = ydl.extract_info(link , download=False)
+            if(result["is_live"]):
+                print("is live "+link)
+            else:
+                try:
+                    ydl.download([link])
+                except:
+                    print("download error "+link)
+                    filename = ydl.prepare_filename(result)
+                    os.remove(filename+".part")
     except:
-        print("unknown error "+link)
+        print("unknown error "+",".join(args.urls))
