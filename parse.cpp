@@ -2,7 +2,6 @@
 const xmlpp::Node* getroot(const xmlpp::DomParser& parser)
 {
     if(parser){
-        const xmlpp::Node* node;
         const xmlpp::Node* pNode = parser.get_document()->get_root_node();
         if(pNode->get_name()=="feed"){
             return pNode;
