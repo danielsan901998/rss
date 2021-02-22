@@ -5,7 +5,7 @@ PCH_SRC = rss.hpp
 PCH_OUT = rss.hpp.gch
 TARGET = rss
 all : $(TARGET)
-debug : CFLAGS=$(shell pkg-config --cflags --libs libmongocxx curlpp libxml++-2.6) -Wl,-rpath,/usr/local/lib -g
+debug : CFLAGS=$(shell pkg-config --cflags --libs libmongocxx curlpp libxml++-2.6) -Wl,-rpath,/usr/local/lib -g -Wall -Wextra -pedantic
 debug : $(TARGET)
 $(TARGET): $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS)
