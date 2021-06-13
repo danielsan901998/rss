@@ -18,7 +18,15 @@ default = {
         'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',         # name the file the ID of the video
         'quiet':True,
         }
-ydl = youtube_dl.YoutubeDL(default)
+podcast = {
+        'format': 'worst',  # choice of quality
+        'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',         # name the file the ID of the video
+        'quiet':True,
+        }
+if(folder=="podcast/"):
+    ydl = youtube_dl.YoutubeDL(podcast)
+else:
+    ydl = youtube_dl.YoutubeDL(default)
 try:
     for link in args.urls:
         result = ydl.extract_info(link , download=False)
