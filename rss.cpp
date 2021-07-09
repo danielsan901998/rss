@@ -63,7 +63,7 @@ int main(int argc, char* argv[]){
                 std::cout << nombre << " not found"<< std::endl;
             }
             else{
-                std::time_t time=parseyoutube(xml,last,doc);
+                std::time_t time=parseyoutube(xml,date,doc);
                 if(time>last)last=time;
             }
         }
