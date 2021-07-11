@@ -112,7 +112,7 @@ std::string parsepodcast(const std::string& xml, const std::string& last)
                     }
                 }
                 std::replace( title.begin(), title.end(), '/', '-');
-                download(link, "~/videos/podcast/"+title+".mp3");
+                download(link, "/home/daniel/videos/podcast/"+title+".mp3");
             }
         }
 

@@ -30,25 +30,29 @@ std::string request(const std::string& string)
     }
     return os.str();
 }
-void download(const std::string& string, const std::string& filename)
+void download(const std::string& url, const std::string& filename)
 {
     std::ofstream os(filename);
     try
     {
         curlpp::Cleanup myCleanup;
         curlpp::Easy request;
-        request.setOpt(new curlpp::options::Url(string));
+        request.setOpt(new curlpp::options::Url(url));
         request.setOpt(new curlpp::options::NoBody(true));
         request.perform();
-        char* url;
+        char* redirect;
         long code = curlpp::infos::ResponseCode::get(request);
         if(code==200){
-            os << curlpp::options::Url(string);
+            os << curlpp::options::Url(url);
+            return;
+        }
+        if(code==301 || code==302){
+            curlpp::InfoGetter::get(request,CURLINFO_REDIRECT_URL, redirect);
+            download(redirect,filename);
             return;
         }
         else{
-            curlpp::InfoGetter::get(request,CURLINFO_REDIRECT_URL, url);
-            os << curlpp::options::Url(url);
+            std::cout << "error" << std::endl;
             return;
         }
     }
