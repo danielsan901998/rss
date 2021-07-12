@@ -45,7 +45,6 @@ int main(int argc, char* argv[]){
                         bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "ultimo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
             }
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     col = conn["database"]["youtube"];
