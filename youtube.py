@@ -13,7 +13,12 @@ folder=""
 if args.folder:
     folder=args.folder
     folder=folder+'/'
-default = {
+first = {
+        'format': '248+251',  # choice of quality
+        'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',         # name the file the ID of the video
+        'quiet':True,
+        }
+last = {
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4',  # choice of quality
         'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',         # name the file the ID of the video
         'quiet':True,
@@ -26,18 +31,20 @@ podcast = {
 if(folder=="podcast/"):
     ydl = youtube_dl.YoutubeDL(podcast)
 else:
-    ydl = youtube_dl.YoutubeDL(default)
+    ydl1 = youtube_dl.YoutubeDL(first)
+    ydl2 = youtube_dl.YoutubeDL(last)
 try:
     for link in args.urls:
-        result = ydl.extract_info(link , download=False)
+        result = ydl2.extract_info(link , download=False)
         if(result["is_live"]):
             print("is live "+link)
         else:
             try:
-                ydl.download([link])
+                ydl1.download([link])
             except:
-                print("download error "+link)
-                filename = ydl.prepare_filename(result)
-                os.remove(filename+".part")
+                try:
+                    ydl2.download([link])
+                except:
+                    print("download error "+link)
 except:
     print("unknown error "+" ".join(args.urls))
