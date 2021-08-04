@@ -35,7 +35,7 @@ podcast = {
         'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',
         'quiet':True,
         }
-ydl=youtube_dl.YoutubeDL({})
+ydl=youtube_dl.YoutubeDL({'quiet':True})
 try:
     for link in args.urls:
         meta = ydl.extract_info(link , download=False)
