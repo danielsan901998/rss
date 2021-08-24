@@ -7,7 +7,6 @@
 #include <chrono>
 #include <thread>
 #include <algorithm>
-#include <regex>
 
 #include <curlpp/cURLpp.hpp>
 #include <curlpp/Easy.hpp>
