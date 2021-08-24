@@ -38,23 +38,9 @@ void download(const std::string& url, const std::string& filename)
         curlpp::Cleanup myCleanup;
         curlpp::Easy request;
         request.setOpt(new curlpp::options::Url(url));
-        request.setOpt(new curlpp::options::NoBody(true));
-        request.perform();
-        char* redirect;
-        long code = curlpp::infos::ResponseCode::get(request);
-        if(code==200){
-            os << curlpp::options::Url(url);
-            return;
-        }
-        if(code==301 || code==302){
-            curlpp::InfoGetter::get(request,CURLINFO_REDIRECT_URL, redirect);
-            download(redirect,filename);
-            return;
-        }
-        else{
-            std::cout << "error" << std::endl;
-            return;
-        }
+        request.setOpt(new curlpp::options::FollowLocation(true));
+        os << request;
+        return;
     }
 
     catch( curlpp::RuntimeError &e )
