@@ -55,6 +55,7 @@ int main(int argc, char* argv[]){
         std::time_t last=date;
         cursor = col.find(bsoncxx::builder::stream::document{}<<"descargar"<<true<<bsoncxx::builder::stream::finalize);
         for (auto&& doc : cursor) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(800));
             std::string nombre=doc["nombre"].get_utf8().value.to_string();
             std::string xml=request("https://www.youtube.com/feeds/videos.xml?channel_id="+doc["id"].get_utf8().value.to_string());
             if(xml==""){

@@ -4,7 +4,9 @@ import os
 import argparse
 parser = argparse.ArgumentParser(description='process url')
 parser.add_argument('urls', nargs='+', help='videos to download')
-parser.add_argument('-f',"--folder", dest="folder", help='folder')
+parser.add_argument('-f',"--folder", dest="folder", help='output folder')
+parser.add_argument('-q',"--quiet", dest="quiet", help='quiet mode', action='store_true')
+parser.set_defaults(quiet=False)
 
 args=parser.parse_args()
 import youtube_dl
@@ -16,24 +18,24 @@ if args.folder:
     folder=args.folder
     folder=folder+'/'
 first = {
-        'format': '248+251',  # choice of quality
+        'format': '248+bestaudio[ext=webm]',  # choice of quality
         'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',         # name the file the ID of the video
-        'quiet':True,
+        'quiet':args.quiet,
         }
 second = {
-        'format': '303+251',
+        'format': '303+bestaudio[ext=webm]',
         'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',
-        'quiet':True,
+        'quiet':args.quiet,
         }
 mp4 = {
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4',
         'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',
-        'quiet':True,
+        'quiet':args.quiet,
         }
 podcast = {
         'format': 'worst',
         'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',
-        'quiet':True,
+        'quiet':args.quiet,
         }
 ydl=youtube_dl.YoutubeDL({'quiet':True})
 try:
