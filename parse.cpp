@@ -132,7 +132,7 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last,const bsoncxx:
         const xmlpp::Node* node = getroot(parser);
         if(node==nullptr)return std::time_t(0);
         std::string command="~/bin/youtube -q";
-        std::string output=">> ~/youtube.log";
+        std::string output="> /dev/null";
         std::string folder="";
         std::time_t first=last;
         std::vector<std::string> contain;
