@@ -1,17 +1,28 @@
-CC=g++
-CFLAGS=$(shell pkg-config --cflags --libs libmongocxx curlpp libxml++-2.6) -Wl,-rpath,/usr/local/lib -O3
-OBJ = rss.o request.o parse.o
-PCH_SRC = rss.hpp
-PCH_OUT = rss.hpp.gch
 TARGET = rss
-all : $(TARGET)
-debug : CFLAGS=$(shell pkg-config --cflags --libs libmongocxx curlpp libxml++-2.6) -Wl,-rpath,/usr/local/lib -g -Wall -Wextra -pedantic
-debug : $(TARGET)
-$(TARGET): $(OBJ)
-	$(CC) -o $@ $^ $(CFLAGS)
-$(PCH_OUT): $(PCH_SRC)
-	$(CC)  -c $< $(CFLAGS) -shared
-%.o: %.cpp $(PCH_OUT)
-	$(CC) -c -o $@ $< $(CFLAGS) -include $(PCH_SRC)
+CC=g++
+CPPFLAGS=$(shell pkg-config --cflags libmongocxx curlpp libxml++-2.6) -I. -Wall -Wextra -pedantic
+LIBS=$(shell pkg-config --libs libmongocxx curlpp libxml++-2.6) -Wl,-rpath,/usr/local/lib
+SRC := $(wildcard *.cpp)
+OBJ_DIR  := objects
+OBJECTS := $(SRC:%.cpp=$(OBJ_DIR)/%.o)
+
+$(TARGET): $(OBJECTS)
+	$(CC) -o $@ $(OBJECTS) $(CPPFLAGS) $(LIBS)
+
+$(OBJ_DIR)/%.o: %.cpp
+	@mkdir -p $(@D)
+	$(CC) $(CPPFLAGS) -o $@ -c $<
+
+debug: CPPFLAGS += -Og -g
+debug: $(TARGET)
+release: CPPFLAGS += -O3
+release: $(TARGET)
+check: CPPFLAGS += -fsyntax-only
+check: $(OBJECTS)
+
 clean:
-	rm -f $(OBJ) $(TARGET) $(PCH_OUT) *~
+	-@rm -rvf $(OBJ_DIR)
+	-@rm -vf $(TARGET)
+
+.PHONY: clean debug release check
+

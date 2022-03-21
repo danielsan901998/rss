@@ -1,6 +1,6 @@
-#include "rss.hpp"
-const xmlpp::Node* getroot(const xmlpp::DomParser& parser)
-{
+#include "parse.hpp"
+
+const xmlpp::Node* getroot(const xmlpp::DomParser& parser){
     if(parser){
         const xmlpp::Node* pNode = parser.get_document()->get_root_node();
         if(pNode->get_name()=="feed"){
@@ -41,8 +41,7 @@ std::string getcontent(const xmlpp::Node* node){
     }
     return "";
 }
-std::string parseblog(const std::string& xml, const std::string& last, const std::string& contain)
-{
+std::string parseblog(const std::string& xml, const std::string& last, const std::string& contain){
     std::string first="";
     try
     {
@@ -80,8 +79,7 @@ std::string parseblog(const std::string& xml, const std::string& last, const std
     }
     return first;
 }
-std::string parsepodcast(const std::string& xml, const std::string& last)
-{
+std::string parsepodcast(const std::string& xml, const std::string& last){
     std::string first="";
     try
     {
@@ -123,8 +121,7 @@ std::string parsepodcast(const std::string& xml, const std::string& last)
     }
     return first;
 }
-std::time_t parseyoutube(const std::string& xml, std::time_t last,const bsoncxx::v_noabi::document::view& doc )
-{
+std::time_t parseyoutube(const std::string& xml, std::time_t last,const bsoncxx::v_noabi::document::view& doc ){
     try
     {
         xmlpp::DomParser parser;

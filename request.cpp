@@ -1,7 +1,6 @@
-#include "rss.hpp"
+#include "request.hpp"
 
-std::string request(const std::string& string)
-{
+std::string request(const std::string& string){
     std::ostringstream os;
     try
     {
@@ -31,8 +30,7 @@ std::string request(const std::string& string)
     }
     return os.str();
 }
-void download(const std::string& url, const std::string& filename)
-{
+void download(const std::string& url, const std::string& filename){
     std::ofstream os(filename);
     try
     {
