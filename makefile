@@ -9,7 +9,7 @@ OBJECTS := $(SRC:%.cpp=$(OBJ_DIR)/%.o)
 $(TARGET): $(OBJECTS)
 	$(CC) -o $@ $(OBJECTS) $(CPPFLAGS) $(LIBS)
 
-$(OBJ_DIR)/%.o: %.cpp
+$(OBJ_DIR)/%.o: %.cpp %.hpp
 	@mkdir -p $(@D)
 	$(CC) $(CPPFLAGS) -o $@ -c $<
 
