@@ -43,6 +43,7 @@ std::string getcontent(const xmlpp::Node* node){
 }
 std::string parseblog(const std::string& xml, const std::string& last, const std::string& contain){
     std::string first="";
+    std::vector<std::string> links;
     try
     {
         xmlpp::DomParser parser;
@@ -61,14 +62,19 @@ std::string parseblog(const std::string& xml, const std::string& last, const std
                     if(childname=="title") {
                         title=getcontent(child);
                         if(first=="")first=title;
-                        if(title==last) return first;
+                        if(title==last){
+                            std::reverse(links.begin(), links.end());
+                            for(const std::string& l:links)
+                                std::cout << l << std::endl;
+                            return first;
+                        }
                     }
                     else if(childname=="link"){
                         link=getcontent(child);
                     }
                 }
                 if(contain=="" || title.find(contain)!=std::string::npos){
-                    std::cout << link << std::endl;
+                    links.push_back(link);
                 }
             }
         }

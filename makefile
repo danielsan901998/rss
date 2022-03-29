@@ -20,6 +20,9 @@ release: $(TARGET)
 check: CPPFLAGS += -fsyntax-only
 check: $(OBJECTS)
 
+install:
+	cp $(TARGET) ~/bin
+
 clean:
 	-@rm -rvf $(OBJ_DIR)
 	-@rm -vf $(TARGET)
