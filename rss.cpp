@@ -23,8 +23,9 @@ int main(int argc, char* argv[]){
                 last=parseblog(xml, articulo, "");
             }
             if(!last.empty() && last!=articulo){
-                col.update_one(bsoncxx::builder::stream::document{} << "blog" << blog << bsoncxx::builder::stream::finalize,  
-                        bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "articulo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);  
+                col.update_one(
+                        bsoncxx::builder::stream::document{} << "blog" << blog << bsoncxx::builder::stream::finalize,  
+                        bsoncxx::builder::stream::document{} << "$set" << bsoncxx::builder::stream::open_document << "articulo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);  
             }
         }
     }
@@ -41,14 +42,16 @@ int main(int argc, char* argv[]){
         else{
             std::string last=parsepodcast(xml, articulo);
             if(!last.empty() && last!=articulo){
-                col.update_one(bsoncxx::builder::stream::document{} << "nombre" << podcast << bsoncxx::builder::stream::finalize,
+                col.update_one(
+                        bsoncxx::builder::stream::document{} << "nombre" << podcast << bsoncxx::builder::stream::finalize,
                         bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "ultimo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
             }
         }
     }
 
     col = conn["database"]["youtube"];
-    bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = col.find_one(bsoncxx::builder::stream::document{}<<"hora"<<bsoncxx::builder::stream::open_document <<"$exists"<<true<<bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
+    bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = col.find_one(
+            bsoncxx::builder::stream::document{}<<"hora"<<bsoncxx::builder::stream::open_document <<"$exists"<<true<<bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
     if(maybe_result){
         bsoncxx::document::element hora =  maybe_result.value().view()["hora"];
         std::time_t date = std::chrono::system_clock::to_time_t(hora.get_date());
@@ -70,7 +73,8 @@ int main(int argc, char* argv[]){
             bsoncxx::types::b_date doc=bsoncxx::types::b_date{
                 std::chrono::system_clock::from_time_t(last)
             };
-            col.update_one(bsoncxx::builder::stream::document{}<<"hora"<<bsoncxx::builder::stream::open_document <<"$exists"<<true<<bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize,
+            col.update_one(
+                    bsoncxx::builder::stream::document{}<<"hora"<<bsoncxx::builder::stream::open_document <<"$exists"<<true<<bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize,
                     bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "hora" << doc << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
         }
     }
