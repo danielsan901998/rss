@@ -9,10 +9,7 @@ parser.add_argument('-q',"--quiet", dest="quiet", help='quiet mode', action='sto
 parser.set_defaults(quiet=False)
 
 args=parser.parse_args()
-import youtube_dl
-
-webm1=False
-webm2=False
+import yt_dlp
 folder=""
 if args.folder:
     folder=args.folder
@@ -21,25 +18,31 @@ first = {
         'format': '248+bestaudio[ext=webm]',  # choice of quality
         'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',         # name the file the ID of the video
         'quiet':args.quiet,
+        'noprogress':args.quiet,
         }
 second = {
         'format': '303+bestaudio[ext=webm]',
         'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',
         'quiet':args.quiet,
+        'noprogress':args.quiet,
         }
 mp4 = {
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4',
         'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',
         'quiet':args.quiet,
+        'noprogress':args.quiet,
         }
 podcast = {
         'format': 'worst',
         'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',
         'quiet':args.quiet,
+        'noprogress':args.quiet,
         }
-ydl=youtube_dl.YoutubeDL({'quiet':True})
+ydl=yt_dlp.YoutubeDL({'quiet':True})
 try:
     for link in args.urls:
+        webm1=False
+        webm2=False
         meta = ydl.extract_info(link , download=False)
         formats = meta.get('formats', [meta])
         for f in formats:
@@ -51,14 +54,14 @@ try:
             print("is live "+link)
         else:
             if(folder=="podcast/"):
-                ydl = youtube_dl.YoutubeDL(podcast)
+                ydl = yt_dlp.YoutubeDL(podcast)
             else:
                 if webm1==True:
-                    ydl = youtube_dl.YoutubeDL(first)
+                    ydl = yt_dlp.YoutubeDL(first)
                 elif webm2==True:
-                    ydl = youtube_dl.YoutubeDL(second)
+                    ydl = yt_dlp.YoutubeDL(second)
                 else:
-                    ydl = youtube_dl.YoutubeDL(mp4)
+                    ydl = yt_dlp.YoutubeDL(mp4)
             try:
                 ydl.download([link])
             except:
