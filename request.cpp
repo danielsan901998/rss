@@ -35,10 +35,10 @@ void download(const std::string& url, const std::string& filename){
     try
     {
         curlpp::Cleanup myCleanup;
-        curlpp::Easy request;
-        request.setOpt(new curlpp::options::Url(url));
-        request.setOpt(new curlpp::options::FollowLocation(true));
-        os << request;
+        curlpp::Easy myRequest;
+        myRequest.setOpt(new curlpp::options::Url(url));
+        myRequest.setOpt(new curlpp::options::FollowLocation(true));
+        os << myRequest;
         return;
     }
 
