@@ -1,7 +1,7 @@
 TARGET = rss
 CC=g++
-CPPFLAGS=$(shell pkg-config --cflags libmongocxx curlpp libxml++-2.6) -I. -Wall -Wextra -pedantic
-LIBS=$(shell pkg-config --libs libmongocxx curlpp libxml++-2.6) -Wl,-rpath,/usr/local/lib
+CPPFLAGS=$(shell pkg-config --cflags libmongocxx curlpp) -I. -Wall -Wextra -pedantic
+LIBS=$(shell pkg-config --libs libmongocxx curlpp)  -ltinyxml2 -Wl,-rpath,/usr/local/lib
 SRC := $(wildcard *.cpp)
 OBJ_DIR  := objects
 OBJECTS := $(SRC:%.cpp=$(OBJ_DIR)/%.o)
