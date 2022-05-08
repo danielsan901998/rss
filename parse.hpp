@@ -1,7 +1,6 @@
 #pragma once
 #include "request.hpp"
 
-#include <libxml++/libxml++.h>
 #include <bsoncxx/builder/stream/document.hpp>
 #include <string>
 

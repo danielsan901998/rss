@@ -1,4 +1,5 @@
 #include "parse.hpp"
+#include <libxml++/libxml++.h>
 #include <iostream>
 #include <iomanip>
 
