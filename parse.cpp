@@ -1,4 +1,6 @@
 #include "parse.hpp"
+#include <iostream>
+#include <iomanip>
 
 const xmlpp::Node* getroot(const xmlpp::DomParser& parser){
     if(parser){

@@ -1,5 +1,13 @@
 #include "request.hpp"
 
+#include <curlpp/cURLpp.hpp>
+#include <curlpp/Easy.hpp>
+#include <curlpp/Options.hpp>
+#include <curlpp/Infos.hpp>
+
+#include <sstream>
+#include <fstream>
+
 std::string request(const std::string& string){
     std::ostringstream os;
     try

@@ -3,10 +3,7 @@
 
 #include <libxml++/libxml++.h>
 #include <bsoncxx/builder/stream/document.hpp>
-
 #include <string>
-#include <iostream>
-#include <iomanip>
 
 std::string parseblog(const std::string& xml, const std::string& last, const std::string& contain);
 std::string parsepodcast(const std::string& xml, const std::string& last);

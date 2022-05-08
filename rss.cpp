@@ -1,6 +1,18 @@
-#include "rss.hpp"
+#include "parse.hpp"
+#include "request.hpp"
 
-int main(int argc, char* argv[]){
+#include <iostream>
+#include <string>
+#include <chrono>
+#include <thread>
+
+#include <bsoncxx/builder/stream/document.hpp>
+#include <bsoncxx/json.hpp>
+#include <mongocxx/client.hpp>
+#include <mongocxx/instance.hpp>
+#include <mongocxx/uri.hpp>
+
+int main(){
     std::locale::global(std::locale(""));
     mongocxx::instance inst{};
     mongocxx::client conn{mongocxx::uri{}};
