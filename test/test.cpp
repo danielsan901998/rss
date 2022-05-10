@@ -36,9 +36,14 @@ int main(){
                 std::cout << blog << " not found"<< std::endl;
             }
             else{
-                std::ofstream out(blog);
+                std::ofstream out(folder+blog);
                 out << xml;
             }
+        }else{
+            std::ifstream t(folder+blog);
+            std::stringstream buffer;
+            buffer << t.rdbuf();
+            xml=buffer.str();
         }
         if(doc["contain"]) {
             last=parseblog(xml, articulo, doc["contain"].get_utf8().value.to_string());
@@ -61,9 +66,14 @@ int main(){
                 std::cout << blog << " not found"<< std::endl;
             }
             else{
-                std::ofstream out(blog);
+                std::ofstream out(folder+blog);
                 out << xml;
             }
+        }else{
+            std::ifstream t(folder+blog);
+            std::stringstream buffer;
+            buffer << t.rdbuf();
+            xml=buffer.str();
         }
         std::string last=parsepodcast(xml, articulo);
         std::cout << blog << ": " << last << std::endl;
@@ -85,14 +95,17 @@ int main(){
                     std::cout << blog << " not found"<< std::endl;
                 }
                 else{
-                    std::ofstream out(blog);
+                    std::ofstream out(folder+blog);
                     out << xml;
                 }
+            }else{
+                std::ifstream t(folder+blog);
+                std::stringstream buffer;
+                buffer << t.rdbuf();
+                xml=buffer.str();
             }
             std::time_t time=parseyoutube(xml,date,doc);
             std::cout << blog << ": " << time << std::endl;
-            std::ofstream out(blog);
-            out << xml;
             return 0;
         }
     }
