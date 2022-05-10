@@ -51,7 +51,7 @@ int main(){
         else {
             last=parseblog(xml, articulo, "");
         }
-        std::cout << blog << ": " << last << std::endl;
+        std::cout << blog << ": " << last << "\n---------"<< std::endl;
     }
 
     col = conn["database"]["podcast"];
@@ -76,7 +76,7 @@ int main(){
             xml=buffer.str();
         }
         std::string last=parsepodcast(xml, articulo);
-        std::cout << blog << ": " << last << std::endl;
+        std::cout << blog << ": " << last << "\n---------"<< std::endl;
     }
 
     col = conn["database"]["youtube"];
