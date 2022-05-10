@@ -1,2 +1,4 @@
 rss
 objects
+.cache
+build
