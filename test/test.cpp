@@ -90,7 +90,7 @@ int main(){
             std::string blog=doc["nombre"].get_utf8().value.to_string();
             std::string xml;
             if(!fs::exists(folder+blog)){
-                xml=request(doc["url"].get_utf8().value.to_string());
+                xml=request("https://www.youtube.com/feeds/videos.xml?channel_id="+doc["id"].get_utf8().value.to_string());
                 if(xml==""){
                     std::cout << blog << " not found"<< std::endl;
                 }
