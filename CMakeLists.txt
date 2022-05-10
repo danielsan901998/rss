@@ -26,6 +26,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE mongo::mongocxx_shared)
 target_link_libraries(${PROJECT_NAME} PRIVATE curl)
 target_link_libraries(${PROJECT_NAME} PRIVATE curlpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE tinyxml2)
+install(TARGETS ${PROJECT_NAME}
+        RUNTIME DESTINATION ~/bin)
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic")
 set(CMAKE_CXX_FLAGS_DEBUG "-Og -g")
