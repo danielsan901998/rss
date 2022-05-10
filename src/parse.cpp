@@ -3,6 +3,8 @@
 #include <tinyxml2.h>
 #include <iostream>
 #include <iomanip>
+#include <unistd.h>
+
 std::string getcontent(const tinyxml2::XMLElement* element){
     std::string content;
     const char* tmp=element->GetText();
@@ -93,14 +95,12 @@ std::string parsepodcast(const std::string& xml, const std::string& last){
                 }
             }
             std::replace( title.begin(), title.end(), '/', '-');
-            std::cout << link << std::endl;
-            //download(link, "/home/daniel/videos/podcast/"+title+".mp3");
+            download(link, "/home/daniel/videos/podcast/"+title+".mp3");
         }
     }
     return first;
 }
 std::time_t parseyoutube(const std::string& xml, std::time_t last,const bsoncxx::v_noabi::document::view& doc_view ){
-
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
     const tinyxml2::XMLElement* root = getroot(doc);
@@ -138,8 +138,9 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last,const bsoncxx:
                     if(time<=last)
                     {
                         if(urls!=""){
-                            std::cout << command+urls+folder+output << std::endl;
-                            //system((command+urls+folder+output).c_str());
+                            int ret=system((command+urls+folder+output).c_str());
+                            if(ret==-1)
+                                std::cout << "error en llamada a system: " << (command+urls+folder+output) << std::endl;
                         }
                         return first;
                     }
