@@ -73,7 +73,6 @@ std::string parseblog(const std::string& xml, const std::string& last, const std
 }
 std::string parsepodcast(const std::string& xml, const std::string& last){
     std::string first;
-    std::vector<std::string> links;
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
     const tinyxml2::XMLElement* root = getroot(doc);
@@ -121,7 +120,6 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last,const bsoncxx:
             notcontain.push_back(msg.get_utf8().value.to_string());
         }
     }
-    std::vector<std::string> links;
     for(auto item = root->FirstChildElement();item;item=item->NextSiblingElement()){
         const std::string nodename = item->Name();
         if(nodename=="entry"){
@@ -132,7 +130,7 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last,const bsoncxx:
             for(auto e = item->FirstChildElement();e;e=e->NextSiblingElement()){
                 const std::string childname = e->Name();
                 if(childname=="published"){
-                    std::istringstream ss(e->Value());
+                    std::istringstream ss(getcontent(e));
                     ss >> std::get_time(&t, "%Y-%m-%dT%H:%M:%S+00:00");
                     time = mktime(&t);
                     if(time<=last)
@@ -147,7 +145,7 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last,const bsoncxx:
                     else if(first==last) first=time;
                 }
                 else if(childname=="title") {
-                    title=e->Value();
+                    title=getcontent(e);
                 }
                 else if(childname=="link"){
                     link=getcontent(e);
