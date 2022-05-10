@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.12)
-
 # set the project name
 project(rss)
+# specify the C++ standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 find_package(mongocxx REQUIRED)
 find_package(bsoncxx REQUIRED)
@@ -9,7 +11,6 @@ find_package(CURL REQUIRED)
 include_directories(${LIBMONGOCXX_INCLUDE_DIR})
 include_directories(${LIBBSONCXX_INCLUDE_DIR})
 include_directories(${CURL_INCLUDE_DIR})
-
 
 #sources files
 set(SOURCES 
