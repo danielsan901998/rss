@@ -120,6 +120,9 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last,const bsoncxx:
             notcontain.push_back(msg.get_utf8().value.to_string());
         }
     }
+    if(doc_view["folder"]){
+        folder=" -f "+doc_view["folder"].get_utf8().value.to_string();
+    }
     for(auto item = root->FirstChildElement();item;item=item->NextSiblingElement()){
         const std::string nodename = item->Name();
         if(nodename=="entry"){
