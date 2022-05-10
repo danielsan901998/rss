@@ -8,10 +8,9 @@
 std::string getcontent(const tinyxml2::XMLElement* element){
     std::string content;
     const char* tmp=element->GetText();
-    if(tmp){
+    if(tmp)
         return tmp;
-    }
-    const tinyxml2::XMLAttribute * attribute = element->FindAttribute("href");
+    const tinyxml2::XMLAttribute* attribute = element->FindAttribute("href");
     if(attribute)
         return attribute->Value();
     attribute = element->FindAttribute("url");
@@ -22,11 +21,7 @@ std::string getcontent(const tinyxml2::XMLElement* element){
 
 const tinyxml2::XMLElement* getroot(const tinyxml2::XMLDocument& doc){
     if(!doc.Error()){
-        const tinyxml2::XMLElement* element = doc.FirstChildElement();
-        element = doc.FirstChildElement("feed");
-        if(element)
-            return element;
-        element = doc.FirstChildElement("channel");
+        const tinyxml2::XMLElement* element = doc.FirstChildElement("feed");
         if(element)
             return element;
         element = doc.FirstChildElement("rss");
@@ -77,6 +72,7 @@ std::string parsepodcast(const std::string& xml, const std::string& last){
     doc.Parse(xml.c_str());
     const tinyxml2::XMLElement* root = getroot(doc);
     if(root==nullptr)return first;
+    return first;
     for(auto item = root->FirstChildElement();item;item=item->NextSiblingElement()){
         const std::string nodename = item->Name();
         if(nodename=="item" || nodename=="entry"){
