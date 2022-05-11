@@ -3,6 +3,7 @@
 #include <tinyxml2.h>
 #include <iostream>
 #include <iomanip>
+#include <vector>
 #include <unistd.h>
 
 std::string getcontent(const tinyxml2::XMLElement* element){

@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 # set the project name
 project(rss)
-# specify the C++ standard
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 find_package(mongocxx REQUIRED)
 find_package(bsoncxx REQUIRED)
@@ -20,6 +17,7 @@ set(SOURCES
     )
 # add the executable
 add_executable(${PROJECT_NAME} ${SOURCES})
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 target_include_directories(${PROJECT_NAME} PRIVATE "include/")
 target_link_libraries(${PROJECT_NAME} PRIVATE mongo::bsoncxx_shared)
 target_link_libraries(${PROJECT_NAME} PRIVATE mongo::mongocxx_shared)
