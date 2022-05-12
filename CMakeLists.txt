@@ -8,7 +8,7 @@ find_package(CURL REQUIRED)
 include_directories(${LIBMONGOCXX_INCLUDE_DIR})
 include_directories(${LIBBSONCXX_INCLUDE_DIR})
 include_directories(${CURL_INCLUDE_DIR})
-include_directories("include/")
+include_directories("$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>")
 
 add_library(libparse STATIC src/parse.cpp)
 add_library(librequest STATIC src/request.cpp)
