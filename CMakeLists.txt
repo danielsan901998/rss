@@ -28,8 +28,6 @@ install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION ~/bin)
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic")
-set(CMAKE_CXX_FLAGS_DEBUG "-Og -g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
