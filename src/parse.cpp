@@ -73,7 +73,6 @@ std::string parsepodcast(const std::string& xml, const std::string& last){
     doc.Parse(xml.c_str());
     const tinyxml2::XMLElement* root = getroot(doc);
     if(root==nullptr)return first;
-    return first;
     for(auto item = root->FirstChildElement();item;item=item->NextSiblingElement()){
         const std::string nodename = item->Name();
         if(nodename=="item" || nodename=="entry"){

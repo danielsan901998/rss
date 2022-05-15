@@ -17,25 +17,8 @@ int main(){
     mongocxx::instance inst{};
     mongocxx::client conn{mongocxx::uri{}};
 
-    auto col = conn["database"]["blogs"];
+    auto col = conn["database"]["podcast"];
     auto cursor = col.find({});
-    for (const auto& doc : cursor) {
-        std::string blog= doc["blog"].get_utf8().value.to_string();
-        std::string articulo= doc["articulo"].get_utf8().value.to_string();
-        std::string last;
-        std::string xml=request(doc["url"].get_utf8().value.to_string());
-        if(xml==""){
-            std::cout << blog << " not found"<< std::endl;
-        }
-        else{
-            if(doc["contain"]) {
-                last=parseblog(xml, articulo, doc["contain"].get_utf8().value.to_string());
-            }
-            else {
-                last=parseblog(xml, articulo, "");
-            }
-        }
-    }
     for (const auto& doc : cursor) {
         std::string podcast= doc["nombre"].get_utf8().value.to_string();
         std::string articulo= doc["ultimo"].get_utf8().value.to_string();
@@ -45,6 +28,7 @@ int main(){
         }
         else{
             std::string last=parsepodcast(xml, articulo);
+            std::cout << last << std::endl;
         }
     }
     return 0;
