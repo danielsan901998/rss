@@ -39,7 +39,7 @@ int main(){
                         bsoncxx::builder::stream::document{} << "blog" << blog << bsoncxx::builder::stream::finalize,  
                         bsoncxx::builder::stream::document{} << "$set" << bsoncxx::builder::stream::open_document << "articulo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);  
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(400));
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
 
@@ -59,7 +59,7 @@ int main(){
                         bsoncxx::builder::stream::document{} << "nombre" << podcast << bsoncxx::builder::stream::finalize,
                         bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "ultimo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(400));
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
 
@@ -81,7 +81,7 @@ int main(){
                 std::time_t time=parseyoutube(xml,date,doc);
                 if(time>last)last=time;
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(600));
+            std::this_thread::sleep_for(std::chrono::milliseconds(400));
         }
         if(last!=date){
             bsoncxx::types::b_date doc=bsoncxx::types::b_date{
