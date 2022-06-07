@@ -16,6 +16,7 @@ std::string request(const std::string& string){
         curlpp::Easy myRequest;
         myRequest.setOpt<curlpp::options::Url>(string);
         myRequest.setOpt<curlpp::options::FollowLocation>(true);
+        myRequest.setOpt<curlpp::options::MaxRedirs>(20);
         myRequest.setOpt<curlpp::options::SslVerifyPeer>(false);
         myRequest.setOpt<curlpp::options::UserAgent>("curl");
         myRequest.setOpt<curlpp::options::WriteStream>(&os);
