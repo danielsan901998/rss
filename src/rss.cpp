@@ -39,6 +39,7 @@ int main(){
                         bsoncxx::builder::stream::document{} << "blog" << blog << bsoncxx::builder::stream::finalize,  
                         bsoncxx::builder::stream::document{} << "$set" << bsoncxx::builder::stream::open_document << "articulo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);  
             }
+            std::this_thread::sleep_for(std::chrono::milliseconds(400));
         }
     }
 
@@ -58,6 +59,7 @@ int main(){
                         bsoncxx::builder::stream::document{} << "nombre" << podcast << bsoncxx::builder::stream::finalize,
                         bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "ultimo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
             }
+            std::this_thread::sleep_for(std::chrono::milliseconds(400));
         }
     }
 

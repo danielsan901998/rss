@@ -14,22 +14,13 @@
 
 int main(){
     std::locale::global(std::locale(""));
-    mongocxx::instance inst{};
-    mongocxx::client conn{mongocxx::uri{}};
-
-    auto col = conn["database"]["podcast"];
-    auto cursor = col.find({});
-    for (const auto& doc : cursor) {
-        std::string podcast= doc["nombre"].get_utf8().value.to_string();
-        std::string articulo= doc["ultimo"].get_utf8().value.to_string();
-        std::string xml=request(doc["url"].get_utf8().value.to_string());
-        if(xml==""){
-            std::cout << podcast << " not found"<< std::endl;
-        }
-        else{
-            std::string last=parsepodcast(xml, articulo);
-            std::cout << last << std::endl;
-        }
+    std::string xml=request("http://speedboatdope.com/rss/");
+    if(xml==""){
+        std::cout <<" not found"<< std::endl;
+    }
+    else{
+        std::string last=parsepodcast(xml, "629 - Night at the Opera feat. Tim Heidecker (5/19/22)");
+        std::cout << last << std::endl;
     }
     return 0;
 }
