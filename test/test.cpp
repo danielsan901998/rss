@@ -11,5 +11,8 @@ int main(){
     //test redirect limit
     std::string xml=request("https://www.webtoons.com");
     assert(xml=="");
+    //test output
+    xml=request("https://www.youtube.com/");
+    assert(!xml.empty());
     return 0;
 }

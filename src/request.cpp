@@ -12,7 +12,6 @@ std::string request(const std::string& string){
     std::ostringstream os;
     try
     {
-        curlpp::Cleanup myCleanup;
         curlpp::Easy myRequest;
         myRequest.setOpt<curlpp::options::Url>(string);
         myRequest.setOpt<curlpp::options::FollowLocation>(true);
@@ -43,7 +42,6 @@ void download(const std::string& url, const std::string& filename){
     std::ofstream os(filename);
     try
     {
-        curlpp::Cleanup myCleanup;
         curlpp::Easy myRequest;
         myRequest.setOpt(new curlpp::options::Url(url));
         myRequest.setOpt(new curlpp::options::FollowLocation(true));
