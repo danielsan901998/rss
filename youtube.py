@@ -1,5 +1,6 @@
 #!/usr/bin/python3
-def download(quiet: bool, folder: str, urls :List[str]) -> None:
+from typing import List
+def download(quiet: bool, folder: str, urls: List[str]) -> None:
     first = {
             'format': '248+bestaudio[ext=webm]',  # choice of quality
             'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',         # name the file the ID of the video
