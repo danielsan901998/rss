@@ -19,7 +19,7 @@ def main(quiet: bool, folder: str, urls) -> None:
             'noprogress':quiet,
             }
     podcast = {
-            'format': 'worst',
+            'format': 'bestaudio',
             'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',
             'quiet':quiet,
             'noprogress':quiet,
