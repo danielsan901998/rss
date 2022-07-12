@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-def main(quiet: bool, folder: str, urls) -> None:
+def download(quiet: bool, folder: str, urls) -> None:
     first = {
             'format': '248+bestaudio[ext=webm]',  # choice of quality
             'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',         # name the file the ID of the video
@@ -70,4 +70,4 @@ if __name__ == '__main__':
     if args.folder:
         folder=args.folder
         folder=folder+'/'
-    main(quiet=args.quiet,folder=folder,urls=args.urls);
+    download(quiet=args.quiet,folder=folder,urls=args.urls);
