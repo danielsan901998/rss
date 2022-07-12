@@ -7,7 +7,7 @@ def main(quiet: bool, folder: str, urls) -> None:
             'noprogress':quiet,
             }
     second = {
-            'format': '303+bestaudio[ext=webm]',
+            'format': '247+bestaudio[ext=webm]',
             'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',
             'quiet':quiet,
             'noprogress':quiet,
