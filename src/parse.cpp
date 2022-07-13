@@ -4,7 +4,47 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
-#include <unistd.h>
+#include <filesystem>
+#include <Python.h>
+std::filesystem::path home = getenv("HOME");
+Python::Python(){
+    Py_Initialize();
+    std::string path=home / "scripts/rss";
+    PyObject* sysPath = PySys_GetObject("path");
+    PyObject* programName = PyUnicode_FromString(path.c_str());
+    PyList_Append(sysPath, programName);
+    pluginModule = PyImport_ImportModule("youtube");
+
+    if (pluginModule == nullptr){
+        PyErr_Print();
+        throw parse_error();
+    }
+    // pDict is a borrowed reference
+    pDict = PyModule_GetDict(pluginModule);
+    // pFunc is also a borrowed reference
+    pFunc = PyDict_GetItemString(pDict, "download");
+
+    //clean up
+    //PyRun_SimpleString("import youtube");
+    Py_DECREF(programName);
+}
+Python::~Python(){
+    Py_DECREF(pluginModule);
+    Py_Finalize();
+}
+void Python::download(std::string folder, const std::vector<std::string> urls){
+    folder+="/";
+    PyObject* pyfolder = PyUnicode_FromString(folder.c_str());
+    PyObject* pyurls = PyList_New(urls.size());
+    for(size_t i = 0; i<urls.size();i++)
+        PyList_SetItem(pyurls, i, PyUnicode_FromString(urls[i].c_str()));
+    PyObject* args = PyTuple_Pack(3,Py_True,pyfolder,pyurls);
+    PyObject_CallObject(pFunc,args);
+    Py_DECREF(args);
+    Py_DECREF(pyurls);
+    //removed because cause segfault.
+    //Py_DECREF(pyfolder);
+}
 
 std::string getcontent(const tinyxml2::XMLElement* element){
     std::string content;
@@ -90,23 +130,21 @@ std::string parsepodcast(const std::string& xml, const std::string& last){
                 }
             }
             std::replace( title.begin(), title.end(), '/', '-');
-            download(link, "/home/daniel/videos/podcast/"+title+".mp3");
+            download(link, home / "videos/podcast"/title+=".mp3");
         }
     }
     return first;
 }
-std::time_t parseyoutube(const std::string& xml, std::time_t last,const bsoncxx::v_noabi::document::view& doc_view ){
+std::time_t Youtube_Parse::parseyoutube(const std::string& xml, std::time_t last,const bsoncxx::v_noabi::document::view& doc_view ){
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
     const tinyxml2::XMLElement* root = getroot(doc);
     if(root==nullptr)return std::time_t(0);
-    std::string command="~/bin/youtube -q";
-    std::string output=" > /dev/null";
-    std::string folder="";
+    std::string folder;
     std::time_t first=last;
     std::vector<std::string> contain;
     std::vector<std::string> notcontain;
-    std::string urls="";
+    std::vector<std::string> urls;
     if(doc_view["regex"]){
         bsoncxx::document::element reg = doc_view["regex"];
         if(reg["true"])for (const bsoncxx::array::element& msg : reg["true"].get_array().value) {
@@ -117,7 +155,7 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last,const bsoncxx:
         }
     }
     if(doc_view["folder"]){
-        folder=" -f "+doc_view["folder"].get_utf8().value.to_string();
+        folder=doc_view["folder"].get_utf8().value.to_string();
     }
     for(auto item = root->FirstChildElement();item;item=item->NextSiblingElement()){
         const std::string nodename = item->Name();
@@ -134,11 +172,8 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last,const bsoncxx:
                     time = mktime(&t);
                     if(time<=last)
                     {
-                        if(urls!=""){
-                            int ret=system((command+urls+folder+output).c_str());
-                            if(ret==-1)
-                                std::cout << "error en llamada a system: " << (command+urls+folder+output) << std::endl;
-                        }
+                        if(!urls.empty())
+                            py.download(folder,urls);
                         return first;
                     }
                     else if(first==last) first=time;
@@ -161,8 +196,7 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last,const bsoncxx:
                     if(title.find(regex)!=std::string::npos)descargar=false;
             }
             if(descargar){
-                urls+=" ";
-                urls+=link;
+                urls.push_back(link);
             }
         }
     }
