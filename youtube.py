@@ -55,7 +55,7 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
                 except:
                     print("download error "+link)
     except yt_dlp.utils.DownloadError as e:
-        if "Premiere" not in e.msg:
+        if "Premiere" not in e.msg and "live event" not in e.msg:
             print("unknown error "+" ".join(urls))
 
 if __name__ == '__main__':
