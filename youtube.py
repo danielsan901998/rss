@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 from typing import List
 def download(quiet: bool, folder: str, urls: List[str]) -> None:
+    import yt_dlp
     first = {
             'format': '248+bestaudio[ext=webm]',  # choice of quality
             'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',         # name the file the ID of the video
@@ -25,13 +26,12 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
             'quiet':quiet,
             'noprogress':quiet,
             }
-    import yt_dlp
-    ydl=yt_dlp.YoutubeDL({'quiet':True})
-    try:
-        for link in urls:
+    yt_info=yt_dlp.YoutubeDL({'quiet':True})
+    for link in urls:
+        try:
             webm1=False
             webm2=False
-            meta = ydl.extract_info(link , download=False)
+            meta = yt_info.extract_info(link , download=False)
             formats = meta.get('formats', [meta])
             for f in formats:
                 if f["format_id"]=="248":
@@ -54,9 +54,9 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
                     ydl.download([link])
                 except:
                     print("download error "+link)
-    except yt_dlp.utils.DownloadError as e:
-        if "Premiere" not in e.msg and "live event" not in e.msg:
-            print("unknown error "+" ".join(urls))
+        except yt_dlp.utils.DownloadError as e:
+            if "Premiere" not in e.msg and "live event" not in e.msg:
+                print("unknown error "+link)
 
 if __name__ == '__main__':
     import argparse
