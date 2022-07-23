@@ -135,7 +135,7 @@ std::string parsepodcast(const std::string& xml, const std::string& last){
     }
     return first;
 }
-std::time_t Youtube_Parse::parseyoutube(const std::string& xml, std::time_t last,const bsoncxx::v_noabi::document::view& doc_view ){
+std::time_t parseyoutube(const std::string& xml, std::time_t last,const bsoncxx::v_noabi::document::view& doc_view ){
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
     const tinyxml2::XMLElement* root = getroot(doc);
@@ -172,8 +172,10 @@ std::time_t Youtube_Parse::parseyoutube(const std::string& xml, std::time_t last
                     time = mktime(&t);
                     if(time<=last)
                     {
-                        if(!urls.empty())
+                        if(!urls.empty()){
+                            static Python py;
                             py.download(folder,urls);
+                        }
                         return first;
                     }
                     else if(first==last) first=time;

@@ -68,7 +68,6 @@ int main(){
             bsoncxx::builder::stream::document{}<<"hora"<<bsoncxx::builder::stream::open_document <<"$exists"<<true<<bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
     if(maybe_result){
         try{
-            Youtube_Parse parser;
             bsoncxx::document::element hora =  maybe_result.value().view()["hora"];
             std::time_t date = std::chrono::system_clock::to_time_t(hora.get_date());
             std::time_t last=date;
@@ -80,7 +79,7 @@ int main(){
                     std::cout << nombre << " not found"<< std::endl;
                 }
                 else{
-                    std::time_t time=parser.parseyoutube(xml,date,doc);
+                    std::time_t time=parseyoutube(xml,date,doc);
                     if(time>last)last=time;
                 }
                 std::this_thread::sleep_for(std::chrono::milliseconds(400));
