@@ -16,5 +16,5 @@ class Python{
     public:
     Python();
     ~Python();
-    void download(std::string folder, const std::vector<std::string> urls);
+    void download(std::string folder, const std::vector<std::string>& urls);
 };

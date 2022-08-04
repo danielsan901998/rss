@@ -32,7 +32,7 @@ Python::~Python(){
     Py_DECREF(pluginModule);
     Py_Finalize();
 }
-void Python::download(std::string folder, const std::vector<std::string> urls){
+void Python::download(std::string folder, const std::vector<std::string>& urls){
     folder+="/";
     PyObject* pyfolder = PyUnicode_FromString(folder.c_str());
     PyObject* pyurls = PyList_New(urls.size());
