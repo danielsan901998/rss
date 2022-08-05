@@ -30,7 +30,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE librequest)
 target_link_libraries(${PROJECT_NAME} PRIVATE libparse)
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ~/bin)
 
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic -march=native -flto")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic")
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
