@@ -9,7 +9,6 @@
 #include <filesystem>
 
 int main(){
-    std::locale::global(std::locale(""));
     //test output
     std::string xml=request("https://www.youtube.com/");
     assert(!xml.empty());

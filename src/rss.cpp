@@ -13,7 +13,6 @@
 #include <mongocxx/uri.hpp>
 
 int main(){
-    std::locale::global(std::locale(""));
     mongocxx::instance inst{};
     mongocxx::client conn{mongocxx::uri{}};
 
