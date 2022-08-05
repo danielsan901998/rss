@@ -12,16 +12,17 @@ include_directories(${CURL_INCLUDE_DIR})
 include_directories(${PYTHON_INCLUDE_DIRS})
 include_directories("$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>")
 
-add_library(libparse STATIC src/parse.cpp)
 add_library(librequest STATIC src/request.cpp)
 target_link_libraries(librequest PRIVATE curl)
 target_link_libraries(librequest PRIVATE curlpp)
+
+add_library(libparse STATIC src/parse.cpp)
 target_link_libraries(libparse PRIVATE tinyxml2)
 target_link_libraries(libparse PRIVATE mongo::bsoncxx_shared)
+target_link_libraries(libparse PRIVATE ${PYTHON_LIBRARIES})
 
 # add the executable
 add_executable(${PROJECT_NAME} src/rss.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE ${PYTHON_LIBRARIES})
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 target_compile_features(libparse PRIVATE cxx_std_17)
 target_link_libraries(${PROJECT_NAME} PRIVATE mongo::bsoncxx_shared)
