@@ -29,12 +29,12 @@ std::string request(const std::string& string){
 
     catch( curlpp::RuntimeError &e )
     {
-        std::cout << e.what() << std::endl;
+        std::cerr << e.what() << std::endl;
     }
 
     catch( curlpp::LogicError &e )
     {
-        std::cout << e.what() << std::endl;
+        std::cerr << e.what() << std::endl;
     }
     return os.str();
 }
@@ -52,11 +52,11 @@ void download(const std::string& url, const std::string& filename){
 
     catch( curlpp::RuntimeError &e )
     {
-        std::cout << e.what() << std::endl;
+        std::cerr << e.what() << std::endl;
     }
 
     catch( curlpp::LogicError &e )
     {
-        std::cout << e.what() << std::endl;
+        std::cerr << e.what() << std::endl;
     }
 }
