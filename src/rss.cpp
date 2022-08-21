@@ -23,7 +23,7 @@ int main(){
         std::string articulo= doc["articulo"].get_utf8().value.to_string();
         std::string last;
         std::string xml=request(doc["url"].get_utf8().value.to_string());
-        if(xml==""){
+        if(xml.empty()){
             std::cout << blog << " not found"<< std::endl;
         }
         else{
@@ -38,7 +38,7 @@ int main(){
                         bsoncxx::builder::stream::document{} << "blog" << blog << bsoncxx::builder::stream::finalize,  
                         bsoncxx::builder::stream::document{} << "$set" << bsoncxx::builder::stream::open_document << "articulo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);  
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+            std::this_thread::sleep_for(std::chrono::milliseconds(400));
         }
     }
 
@@ -48,7 +48,7 @@ int main(){
         std::string podcast= doc["nombre"].get_utf8().value.to_string();
         std::string articulo= doc["ultimo"].get_utf8().value.to_string();
         std::string xml=request(doc["url"].get_utf8().value.to_string());
-        if(xml==""){
+        if(xml.empty()){
             std::cout << podcast << " not found"<< std::endl;
         }
         else{
@@ -58,7 +58,7 @@ int main(){
                         bsoncxx::builder::stream::document{} << "nombre" << podcast << bsoncxx::builder::stream::finalize,
                         bsoncxx::builder::stream::document{} << "$set"<< bsoncxx::builder::stream::open_document << "ultimo" << last << bsoncxx::builder::stream::close_document <<bsoncxx::builder::stream::finalize);
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+            std::this_thread::sleep_for(std::chrono::milliseconds(400));
         }
     }
 
@@ -74,7 +74,7 @@ int main(){
             for (const auto& doc : cursor) {
                 std::string nombre=doc["nombre"].get_utf8().value.to_string();
                 std::string xml=request("https://www.youtube.com/feeds/videos.xml?channel_id="+doc["id"].get_utf8().value.to_string());
-                if(xml==""){
+                if(xml.empty()){
                     std::cout << nombre << " not found"<< std::endl;
                 }
                 else{

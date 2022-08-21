@@ -9,7 +9,7 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
             'noprogress':quiet,
             }
     second = {
-            'format': '247+bestaudio[ext=webm]',
+            'format': '244+bestaudio[ext=webm]',
             'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',
             'quiet':quiet,
             'noprogress':quiet,
