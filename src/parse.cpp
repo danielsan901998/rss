@@ -11,7 +11,7 @@ Python::Python(){
     Py_Initialize();
     std::string path=home / "scripts/rss";
     PyObject* sysPath = PySys_GetObject("path");
-    PyObject* programName = PyUnicode_FromString(path.c_str());
+    PyObject* programName = PyUnicode_FromStringAndSize(path.c_str(),path.size());
     PyList_Append(sysPath, programName);
     pluginModule = PyImport_ImportModule("youtube");
 
@@ -37,7 +37,7 @@ void Python::download(std::string folder, const std::vector<std::string>& urls){
     PyObject* pyfolder = PyUnicode_FromString(folder.c_str());
     PyObject* pyurls = PyList_New(urls.size());
     for(size_t i = 0; i<urls.size();i++)
-        PyList_SetItem(pyurls, i, PyUnicode_FromString(urls[i].c_str()));
+        PyList_SetItem(pyurls, i, PyUnicode_FromStringAndSize(urls[i].c_str(),urls[i].size()));
     PyObject* args = PyTuple_Pack(3,Py_True,pyfolder,pyurls);
     PyObject_CallObject(pFunc,args);
     Py_DECREF(args);

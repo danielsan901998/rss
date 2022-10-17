@@ -9,7 +9,7 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
             'noprogress':quiet,
             }
     second = {
-            'format': '247+bestaudio[ext=webm]',
+            'format': '244+bestaudio[ext=webm]',
             'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',
             'quiet':quiet,
             'noprogress':quiet,
@@ -38,8 +38,6 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
                     webm1=True
                 elif f["format_id"]=="303":
                     webm2=True
-            if(meta["is_live"]):
-                print("is live "+link)
             else:
                 if(folder=="podcast/"):
                     ydl = yt_dlp.YoutubeDL(podcast)

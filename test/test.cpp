@@ -12,13 +12,10 @@ int main(){
     //test output
     std::string xml=request("https://www.youtube.com/");
     assert(!xml.empty());
-    //test redirect limit
-    xml=request("https://www.webtoons.com");
-    assert(xml=="");
     //check only one initialization
     for(int i=0;i<3;i++){
         static Python py;
-        py.download("resto",{});
+        py.download("resto",{"https://www.youtube.com/shorts/amz0mvUmVoc","https://www.youtube.com/shorts/avCzmwL0Krg"});
     }
     return 0;
 }

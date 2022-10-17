@@ -3,6 +3,7 @@
 
 #include <bsoncxx/builder/stream/document.hpp>
 #include <string>
+#include <vector>
 #include <Python.h>
 
 std::string parseblog(const std::string& xml, const std::string& last, const std::string& contain);
