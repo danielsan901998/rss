@@ -32,6 +32,9 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
             webm1=False
             webm2=False
             meta = yt_info.extract_info(link , download=False)
+            if "live_status" in meta:
+                if meta["live_status"]!=None:
+                    continue
             formats = meta.get('formats', [meta])
             for f in formats:
                 if f["format_id"]=="248":
