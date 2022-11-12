@@ -9,7 +9,7 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
             'noprogress':quiet,
             }
     second = {
-            'format': '244+bestaudio[ext=webm]',
+            'format': '247+bestaudio[ext=webm]',
             'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',
             'quiet':quiet,
             'noprogress':quiet,
@@ -29,32 +29,32 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
     yt_info=yt_dlp.YoutubeDL({'quiet':True})
     for link in urls:
         try:
-            webm1=False
-            webm2=False
             meta = yt_info.extract_info(link , download=False)
             if "live_status" in meta:
-                if meta["live_status"]!=None:
+                if meta["live_status"]!="not_live":
                     continue
-            formats = meta.get('formats', [meta])
-            for f in formats:
-                if f["format_id"]=="248":
-                    webm1=True
-                elif f["format_id"]=="303":
-                    webm2=True
+            if(folder=="podcast/"):
+                ydl = yt_dlp.YoutubeDL(podcast)
             else:
-                if(folder=="podcast/"):
-                    ydl = yt_dlp.YoutubeDL(podcast)
+                webm1=False
+                webm2=False
+                formats = meta.get('formats')
+                if formats:
+                    for f in formats:
+                        if f["format_id"]=="248":
+                            webm1=True
+                        elif f["format_id"]=="303":
+                            webm2=True
+                if webm1==True:
+                    ydl = yt_dlp.YoutubeDL(first)
+                elif webm2==True:
+                    ydl = yt_dlp.YoutubeDL(second)
                 else:
-                    if webm1==True:
-                        ydl = yt_dlp.YoutubeDL(first)
-                    elif webm2==True:
-                        ydl = yt_dlp.YoutubeDL(second)
-                    else:
-                        ydl = yt_dlp.YoutubeDL(mp4)
-                try:
-                    ydl.download([link])
-                except:
-                    print("download error "+link)
+                    ydl = yt_dlp.YoutubeDL(mp4)
+            try:
+                ydl.download([link])
+            except:
+                print("download error "+link)
         except yt_dlp.utils.DownloadError as e:
             if "Premiere" not in e.msg and "live event" not in e.msg:
                 print("unknown error "+link)

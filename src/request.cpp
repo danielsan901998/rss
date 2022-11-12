@@ -44,8 +44,8 @@ void download(const std::string& url, const std::string& filename){
     {
         curlpp::Cleanup myCleanup;
         curlpp::Easy myRequest;
-        myRequest.setOpt(new curlpp::options::Url(url));
-        myRequest.setOpt(new curlpp::options::FollowLocation(true));
+        myRequest.setOpt(curlpp::options::Url(url));
+        myRequest.setOpt(curlpp::options::FollowLocation(true));
         os << myRequest;
         return;
     }
