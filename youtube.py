@@ -3,13 +3,13 @@ from typing import List
 def download(quiet: bool, folder: str, urls: List[str]) -> None:
     import yt_dlp
     first = {
-            'format': '248+bestaudio[ext=weba]',  # choice of quality
+            'format': '248+bestaudio[ext=webm]',  # choice of quality
             'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',         # name the file the ID of the video
             'quiet':quiet,
             'noprogress':quiet,
             }
     second = {
-            'format': '247+bestaudio[ext=weba]',
+            'format': '247+bestaudio[ext=webm]',
             'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',
             'quiet':quiet,
             'noprogress':quiet,
