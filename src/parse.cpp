@@ -129,8 +129,10 @@ std::string parsepodcast(const std::string& xml, const std::string& last){
                     link=getcontent(e);
                 }
             }
-            std::replace( title.begin(), title.end(), '/', '-');
-            download(link, home / "videos/podcast"/title+=".mp3");
+            std::replace(title.begin(), title.end(), '/', '-');
+						title.erase(std::find_if(title.rbegin(), title.rend(), [](char ch)
+									{return !std::isspace(ch);}).base(), title.end());
+						download(link, home / "videos/podcast"/title+=".mp3");
         }
     }
     return first;
