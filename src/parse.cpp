@@ -125,7 +125,7 @@ std::string parsepodcast(const std::string& xml, const std::string& last){
 					if(first=="")first=title;
 					if(title==last) return first;
 				}
-				else if(childname=="link" || childname=="enclosure"){
+				else if(childname=="enclosure"){
 					link=getcontent(e);
 				}
 			}
