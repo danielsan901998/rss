@@ -2,30 +2,6 @@
 from typing import List
 def download(quiet: bool, folder: str, urls: List[str]) -> None:
     import yt_dlp
-    first = {
-            'format': '248+bestaudio[ext=webm]',  # choice of quality
-            'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',         # name the file the ID of the video
-            'quiet':quiet,
-            'noprogress':quiet,
-            }
-    second = {
-            'format': '247+bestaudio[ext=webm]',
-            'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',
-            'quiet':quiet,
-            'noprogress':quiet,
-            }
-    mp4 = {
-            'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4',
-            'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',
-            'quiet':quiet,
-            'noprogress':quiet,
-            }
-    podcast = {
-            'format': 'bestaudio',
-            'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',
-            'quiet':quiet,
-            'noprogress':quiet,
-            }
     yt_info=yt_dlp.YoutubeDL({'quiet':True})
     for link in urls:
         try:
@@ -38,6 +14,8 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
             else:
                 webm1=False
                 webm2=False
+                opus1=False
+                opus2=False
                 formats = meta.get('formats')
                 if formats:
                     for f in formats:
@@ -45,12 +23,29 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
                             webm1=True
                         elif f["format_id"]=="303":
                             webm2=True
+                        elif f["format_id"]=="250":
+                            opus1=True
+                        elif f["format_id"]=="351":
+                            opus2=True
+                yt_format=""
                 if webm1==True:
-                    ydl = yt_dlp.YoutubeDL(first)
+                    yt_format="248+"
                 elif webm2==True:
-                    ydl = yt_dlp.YoutubeDL(second)
+                    yt_format="247+"
                 else:
-                    ydl = yt_dlp.YoutubeDL(mp4)
+                    yt_format="bestvideo[ext=mp4]"
+                if opus1==True:
+                    yt_format+="250"
+                elif opus2==True:
+                    yt_format+="251"
+                else:
+                    yt_format+="bestaudio[ext=m4a]/mp4"
+                ydl = yt_dlp.YoutubeDL({
+                        'format': yt_format,  # choice of quality
+                        'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',         # name the file the ID of the video
+                        'quiet':quiet,
+                        'noprogress':quiet,
+                    })
             try:
                 ydl.download([link])
             except:
