@@ -14,24 +14,29 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
             else:
                 webm1=False
                 webm2=False
+                webm3=False
                 opus1=False
                 opus2=False
                 formats = meta.get('formats')
                 if formats:
                     for f in formats:
-                        if f["format_id"]=="248":
+                        if f["format_id"]=="247":
                             webm1=True
-                        elif f["format_id"]=="303":
+                        elif f["format_id"]=="248":
                             webm2=True
+                        elif f["format_id"]=="303":
+                            webm3=True
                         elif f["format_id"]=="250":
                             opus1=True
                         elif f["format_id"]=="351":
                             opus2=True
                 yt_format=""
                 if webm1==True:
-                    yt_format="248+"
-                elif webm2==True:
                     yt_format="247+"
+                elif webm2==True:
+                    yt_format="248+"
+                elif webm3==True:
+                    yt_format="303+"
                 else:
                     yt_format="bestvideo[ext=mp4]"
                 if opus1==True:
