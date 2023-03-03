@@ -1,7 +1,18 @@
 #!/usr/bin/python3
 from typing import List
+import shutil
+from os.path import expanduser
+import yt_dlp
+from yt_dlp.postprocessor.common import PostProcessor
+class test(PostProcessor):
+    def __init__(self, folder):
+        PostProcessor.__init__(self)
+        self.folder=folder
+    def run(self, information):
+        shutil.move(information['filepath'],expanduser("~")+"/videos/"+self.folder)
+        return [], information
+
 def download(quiet: bool, folder: str, urls: List[str]) -> None:
-    import yt_dlp
     yt_info=yt_dlp.YoutubeDL({'quiet':True})
     for link in urls:
         try:
@@ -10,7 +21,12 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
                 if meta["live_status"]!="not_live":
                     continue
             if(folder=="podcast/"):
-                ydl = yt_dlp.YoutubeDL(podcast)
+                ydl = yt_dlp.YoutubeDL({
+                        'format': 'bestaudio',  # choice of quality
+                        'outtmpl': '/tmp/%(title)s.%(ext)s',
+                        'quiet':quiet,
+                        'noprogress':quiet,
+                    })
             else:
                 webm1=False
                 webm2=False
@@ -47,10 +63,11 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
                     yt_format+="bestaudio[ext=m4a]/mp4"
                 ydl = yt_dlp.YoutubeDL({
                         'format': yt_format,  # choice of quality
-                        'outtmpl': '~/videos/'+folder+'%(title)s.%(ext)s',         # name the file the ID of the video
+                        'outtmpl': '/tmp/%(title)s.%(ext)s',
                         'quiet':quiet,
                         'noprogress':quiet,
                     })
+            ydl.add_post_processor(test(folder))
             try:
                 ydl.download([link])
             except:
