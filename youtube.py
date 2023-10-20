@@ -4,7 +4,7 @@ import shutil
 from os.path import expanduser
 import yt_dlp
 from yt_dlp.postprocessor.common import PostProcessor
-class test(PostProcessor):
+class PostProcess(PostProcessor):
     def __init__(self, folder):
         PostProcessor.__init__(self)
         self.folder=folder
@@ -72,7 +72,7 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
                         'quiet':quiet,
                         'noprogress':quiet,
                     })
-            ydl.add_post_processor(test(folder))
+            ydl.add_post_processor(PostProcess(folder))
             try:
                 ydl.download([link])
             except:
