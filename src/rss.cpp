@@ -73,7 +73,7 @@ int main(){
 			cursor = col.find(bsoncxx::builder::stream::document{}<<"descargar"<<true<<bsoncxx::builder::stream::finalize);
 			for (const auto& doc : cursor) {
 				std::string nombre=doc["nombre"].get_utf8().value.to_string();
-				std::string xml=request("https://www.youtube.com/feeds/videos.xml?channel_id="+doc["id"].get_utf8().value.to_string());
+				std::string xml=request("https://rsshub.app/youtube/channel/"+doc["id"].get_utf8().value.to_string());
 				if(xml.empty()){
 					std::cout << nombre << " not found"<< std::endl;
 				}

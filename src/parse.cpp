@@ -161,16 +161,16 @@ std::time_t parseyoutube(const std::string& xml, std::time_t last,const bsoncxx:
 	}
 	for(auto item = root->FirstChildElement();item;item=item->NextSiblingElement()){
 		const std::string nodename = item->Name();
-		if(nodename=="entry"){
+		if(nodename=="item"){
 			std::string title;
 			std::string link;
 			std::tm t = {};
 			std::time_t time;
 			for(auto e = item->FirstChildElement();e;e=e->NextSiblingElement()){
 				const std::string childname = e->Name();
-				if(childname=="published"){
+				if(childname=="pubDate"){
 					std::istringstream ss(getcontent(e));
-					ss >> std::get_time(&t, "%Y-%m-%dT%H:%M:%S+00:00");
+					ss >> std::get_time(&t, "%a, %d %b %Y %H:%M:%S");
 					time = mktime(&t);
 					if(time<=last)
 					{
