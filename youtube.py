@@ -13,6 +13,8 @@ class PostProcess(PostProcessor):
         return [], information
 
 def download(quiet: bool, folder: str, urls: List[str]) -> None:
+    video_priority = ["247", "248", "303", "136"]  # webm formats first, then mp4
+    audio_priority = ["250", "251","140"]  # opus formats preferred, then m4a
     yt_info=yt_dlp.YoutubeDL({'quiet':True})
     for link in urls:
         try:
@@ -28,44 +30,26 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
                         'noprogress':quiet,
                     })
             else:
-                webm1=False
-                webm2=False
-                webm3=False
-                mp4=False
-                opus1=False
-                opus2=False
                 formats = meta.get('formats')
                 if formats:
+                    video_found = []
+                    audio_found = []
                     for f in formats:
-                        if f["format_id"]=="247":
-                            webm1=True
-                        elif f["format_id"]=="248":
-                            webm2=True
-                        elif f["format_id"]=="303":
-                            webm3=True
-                        elif f["format_id"]=="136":
-                            mp4=True
-                        if f["format_id"]=="250":
-                            opus1=True
-                        elif f["format_id"]=="351":
-                            opus2=True
-                yt_format=""
-                if webm1==True:
-                    yt_format="247+"
-                elif webm2==True:
-                    yt_format="248+"
-                elif webm3==True:
-                    yt_format="303+"
-                elif mp4:
-                    yt_format="136"
-                else:
-                    yt_format="bestvideo[ext=mp4]+"
-                if opus1==True:
-                    yt_format+="250"
-                elif opus2==True:
-                    yt_format+="251"
-                else:
-                    yt_format+="bestaudio[ext=m4a]/mp4"
+                        format_id = f["format_id"]
+                        if format_id in video_priority:
+                            video_found.append(format_id)
+                        if format_id in audio_priority:
+                            audio_found.append(format_id)
+                    for f in video_priority:
+                        if f in video_found:
+                            yt_format = f + "+"
+                            break
+                    for f in audio_priority:
+                        if f in audio_found:
+                            yt_format += f
+                            break
+                if not yt_format:
+                    yt_format="bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4"
                 ydl = yt_dlp.YoutubeDL({
                         'format': yt_format,  # choice of quality
                         'outtmpl': '/tmp/%(title)s.%(ext)s',
