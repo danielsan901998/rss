@@ -21,18 +21,12 @@ int main(){
 	for (const auto& doc : cursor) {
 		std::string blog= doc["blog"].get_utf8().value.to_string();
 		std::string articulo= doc["articulo"].get_utf8().value.to_string();
-		std::string last;
 		std::string xml=request(doc["url"].get_utf8().value.to_string());
 		if(xml.empty()){
 			std::cout << blog << " not found"<< std::endl;
 		}
 		else{
-			if(doc["contain"]) {
-				last=parseblog(xml, articulo, doc["contain"].get_utf8().value.to_string());
-			}
-			else {
-				last=parseblog(xml, articulo, "");
-			}
+			std::string last=parseblog(xml, articulo);
 			if(!last.empty() && last!=articulo){
 				col.update_one(
 						bsoncxx::builder::stream::document{} << "blog" << blog << bsoncxx::builder::stream::finalize,  

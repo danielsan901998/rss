@@ -1,5 +1,5 @@
-rss
-objects
 .cache
-build
 __pycache__
+compile_commands.json
+data.db
+rss

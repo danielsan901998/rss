@@ -1,21 +1,30 @@
 #include <request.hpp>
 #include <parse.hpp>
 
-#include <iostream>
 #include <string>
-#include <chrono>
 #include <cassert>
-#include <thread>
-#include <filesystem>
+#include <fstream>
+#include <sstream>
+
+std::string read_file(const char* path)
+{
+	std::string data;
+	std::ifstream t(path);
+	if(t.is_open())
+	{
+		std::stringstream buffer;
+		buffer << t.rdbuf();
+		data  = buffer.str();
+	}
+
+	return data;
+}
 
 int main(){
-    //test output
-    std::string xml=request("https://www.youtube.com/");
-    assert(!xml.empty());
-    //check only one initialization
-    for(int i=0;i<3;i++){
-        static Python py;
-        py.download("resto",{"https://www.youtube.com/shorts/amz0mvUmVoc","https://www.youtube.com/shorts/avCzmwL0Krg"});
-    }
-    return 0;
+	std::string xml=request("https://localhost/nonexistant");
+	assert(xml.empty());
+	xml=read_file("rss_test.xml");
+	std::string last=parseblog(xml,"test2");
+	assert(last=="test1");
+	return 0;
 }

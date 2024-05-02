@@ -28,9 +28,15 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
                         'outtmpl': '/tmp/%(title)s.%(ext)s',
                         'quiet':quiet,
                         'noprogress':quiet,
+                        'postprocessors': [{
+                            'key': 'FFmpegExtractAudio',
+                            'preferredcodec': 'opus',
+                        }],
                     })
             else:
                 formats = meta.get('formats')
+                video_format="bestvideo"
+                audio_format="bestaudio"
                 if formats:
                     video_found = []
                     audio_found = []
@@ -42,14 +48,13 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
                             audio_found.append(format_id)
                     for f in video_priority:
                         if f in video_found:
-                            yt_format = f + "+"
+                            video_format = f
                             break
                     for f in audio_priority:
                         if f in audio_found:
-                            yt_format += f
+                            audio_format = f
                             break
-                if not yt_format:
-                    yt_format="bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4"
+                yt_format=video_format+'+'+audio_format
                 ydl = yt_dlp.YoutubeDL({
                         'format': yt_format,  # choice of quality
                         'outtmpl': '/tmp/%(title)s.%(ext)s',

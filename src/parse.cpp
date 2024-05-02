@@ -1,4 +1,5 @@
 #include "parse.hpp"
+#include "request.hpp"
 
 #include <tinyxml2.h>
 #include <iostream>
@@ -13,19 +14,17 @@ Python::Python(){
 	PyObject* sysPath = PySys_GetObject("path");
 	PyObject* programName = PyUnicode_FromStringAndSize(path.c_str(),path.size());
 	PyList_Append(sysPath, programName);
+	//equivalent to: PyRun_SimpleString("import youtube");
 	pluginModule = PyImport_ImportModule("youtube");
 
 	if (pluginModule == nullptr){
 		PyErr_Print();
 		throw parse_error();
 	}
-	// pDict is a borrowed reference
 	pDict = PyModule_GetDict(pluginModule);
-	// pFunc is also a borrowed reference
 	pFunc = PyDict_GetItemString(pDict, "download");
 
 	//clean up
-	//PyRun_SimpleString("import youtube");
 	Py_DECREF(programName);
 }
 Python::~Python(){
@@ -42,8 +41,7 @@ void Python::download(std::string folder, const std::vector<std::string>& urls){
 	PyObject_CallObject(pFunc,args);
 	Py_DECREF(args);
 	Py_DECREF(pyurls);
-	//removed because cause segfault.
-	//Py_DECREF(pyfolder);
+	Py_DECREF(pyfolder);
 }
 
 std::string getcontent(const tinyxml2::XMLElement* element){
@@ -72,7 +70,7 @@ const tinyxml2::XMLElement* getroot(const tinyxml2::XMLDocument& doc){
 	return nullptr;
 }
 
-std::string parseblog(const std::string& xml, const std::string& last, const std::string& contain){
+std::string parseblog(const std::string& xml, const std::string& last){
 	std::string first;
 	std::vector<std::string> links;
 	tinyxml2::XMLDocument doc;
@@ -100,9 +98,7 @@ std::string parseblog(const std::string& xml, const std::string& last, const std
 					link=getcontent(e);
 				}
 			}
-			if(contain=="" || title.find(contain)!=std::string::npos){
-				links.push_back(link);
-			}
+			links.push_back(link);
 		}
 	}
 	return first;
