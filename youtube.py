@@ -3,6 +3,7 @@ from typing import List
 import shutil
 from os.path import expanduser
 import yt_dlp
+import sys
 from yt_dlp.postprocessor.common import PostProcessor
 class PostProcess(PostProcessor):
     def __init__(self, folder):
@@ -69,6 +70,7 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
         except yt_dlp.utils.DownloadError as e:
             if "Premiere" not in e.msg and "live event" not in e.msg:
                 print("unknown error "+link)
+    sys.stdout.flush()
 
 if __name__ == '__main__':
     import argparse
