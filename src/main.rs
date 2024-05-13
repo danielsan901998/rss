@@ -237,7 +237,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         if dry_run {
             println!("updating timestamp to {}", new_last);
         }else{
-            conn.execute("update last set unix_time_stamp = ?1 where unix_time_stamp = ?2;",[new_last,last]).expect("failed to update last timestamp");
+            conn.execute("update last set unix_time_stamp = ?;",[new_last]).expect("failed to update last timestamp");
         }
     }
     Ok(())
