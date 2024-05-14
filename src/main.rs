@@ -33,12 +33,12 @@ async fn blog(conn : &Connection, last : DateTime<Utc>) -> Result<i64, Box<dyn s
     })?;
 
     for it in data_iter {
-        let data = it.unwrap();
-        let Ok(resp) = reqwest::get(data.url).await?.text().await else {
+        let data = it?;
+        let Ok(resp) = reqwest::get(data.url).await else{
             println!("error requesting {}", data.name);
             continue;
         };
-        let Ok(feed) = parser::parse(resp.as_bytes()) else{
+        let Ok(feed) = parser::parse(resp.text().await?.as_bytes()) else{
             println!("error processing {}", data.name);
             continue;
         };
@@ -70,12 +70,12 @@ async fn podcast(conn : &Connection, last : DateTime<Utc>, dry_run : bool) -> Re
     })?;
 
     for it in data_iter {
-        let data = it.unwrap();
-        let Ok(resp) = reqwest::get(data.url).await?.text().await else {
+        let data = it?;
+        let Ok(resp) = reqwest::get(data.url).await else{
             println!("error requesting {}", data.name);
             continue;
         };
-        let Ok(feed) = parser::parse(resp.as_bytes()) else{
+        let Ok(feed) = parser::parse(resp.text().await?.as_bytes()) else{
             println!("error processing {}", data.name);
             continue;
         };
@@ -117,12 +117,12 @@ async fn youtube(conn : &Connection, last : DateTime<Utc>, dry_run : bool) -> Re
         })
     })?;
     for it in data_iter {
-        let channel = it.unwrap();
-        let Ok(resp) = reqwest::get(prefix.to_owned()+channel.id.as_str()).await?.text().await else{
+        let channel = it?;
+        let Ok(resp) = reqwest::get(prefix.to_owned()+channel.id.as_str()).await else{
             println!("error requesting {}", channel.name);
             continue;
         };
-        let Ok(feed) = parser::parse(resp.as_bytes()) else{
+        let Ok(feed) = parser::parse(resp.text().await?.as_bytes()) else{
             println!("error processing {}", channel.name);
             continue;
         };
@@ -157,12 +157,12 @@ async fn youtube(conn : &Connection, last : DateTime<Utc>, dry_run : bool) -> Re
         }))
     })?;
     for it in data_iter {
-        let (channel,regex) = it.unwrap();
-        let Ok(resp) = reqwest::get(prefix.to_owned()+channel.id.as_str()).await?.text().await else{
+        let (channel,regex) = it?;
+        let Ok(resp) = reqwest::get(prefix.to_owned()+channel.id.as_str()).await else{
             println!("error requesting {}", channel.name);
             continue;
         };
-        let Ok(feed) = parser::parse(resp.as_bytes()) else{
+        let Ok(feed) = parser::parse(resp.text().await?.as_bytes()) else{
             println!("error processing {}", channel.name);
             continue;
         };
@@ -200,8 +200,7 @@ async fn youtube(conn : &Connection, last : DateTime<Utc>, dry_run : bool) -> Re
                 env!("CARGO_MANIFEST_DIR"),
                 "/youtube.py"
                 ));
-        let download: Py<PyAny> = PyModule::from_code_bound(py, py_app, "", "").unwrap()
-            .getattr("download").unwrap().into();
+        let download: Py<PyAny> = PyModule::from_code_bound(py, py_app, "", "").unwrap() .getattr("download").unwrap().into();
         for (folder, links) in map {
             if dry_run {
                 println!("downloading {:?} to {}", links, folder);
@@ -217,7 +216,7 @@ async fn youtube(conn : &Connection, last : DateTime<Utc>, dry_run : bool) -> Re
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let dir = dirs::video_dir().expect("video dir not found");
     let conn = Connection::open(dir.join("data.db"))?;
-    let last : i64 = conn.query_row("select unix_time_stamp from last;",[], |row| row.get(0)).unwrap();
+    let last : i64 = conn.query_row("select unix_time_stamp from last;",[], |row| row.get(0))?;
     let dt = DateTime::from_timestamp(last, 0).expect("invalid timestamp");
     let dry_run = false;
     let mut new_last = last;
