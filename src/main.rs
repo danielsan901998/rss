@@ -94,7 +94,7 @@ async fn podcast(conn : &Connection, last : DateTime<Utc>, dry_run : bool) -> Re
             if dry_run {
                 println!("link {}", link);
             }else{
-                let resp = reqwest::get(link.as_str()).await.expect("request failed"); // just for learning purposes
+                let resp = reqwest::get(link.as_str()).await.expect("request failed");
                 let body = resp.bytes().await.expect("body invalid");
                 let filename = str::replace(&title, "/", "-")+".mp3";
                 std::fs::write(dir.join("podcast").join(filename), &body).expect("write failed");
@@ -195,20 +195,22 @@ async fn youtube(conn : &Connection, last : DateTime<Utc>, dry_run : bool) -> Re
         }
         thread::sleep(Duration::from_millis(600));
     }
-    Python::with_gil(|py| {
-        let py_app = include_str!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/youtube.py"
-                ));
-        let download: Py<PyAny> = PyModule::from_code_bound(py, py_app, "", "").unwrap() .getattr("download").unwrap().into();
-        for (folder, links) in map {
-            if dry_run {
-                println!("downloading {:?} to {}", links, folder);
-            }else{
-                let _ = download.call1(py,(true,folder,links)).unwrap();
+    if !map.is_empty() {
+        Python::with_gil(|py| {
+            let py_app = include_str!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/youtube.py"
+                    ));
+            let download: Py<PyAny> = PyModule::from_code_bound(py, py_app, "", "").unwrap() .getattr("download").unwrap().into();
+            for (folder, links) in map {
+                if dry_run {
+                    println!("downloading {:?} to {}", links, folder);
+                }else{
+                    let _ = download.call1(py,(true,folder,links)).unwrap();
+                }
             }
-        }
-    });
+        });
+    }
     Ok(new_date.timestamp())
 }
 
