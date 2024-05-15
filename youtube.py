@@ -23,7 +23,7 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
             if "live_status" in meta:
                 if meta["live_status"]!="not_live":
                     continue
-            if(folder=="podcast/"):
+            if(folder=="podcast"):
                 ydl = yt_dlp.YoutubeDL({
                         'format': 'bestaudio',  # choice of quality
                         'outtmpl': '/tmp/%(title)s.%(ext)s',
@@ -84,5 +84,4 @@ if __name__ == '__main__':
     folder=""
     if args.folder:
         folder=args.folder
-        folder=folder+'/'
     download(quiet=args.quiet,folder=folder,urls=args.urls);
