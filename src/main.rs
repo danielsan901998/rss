@@ -52,7 +52,7 @@ async fn blog(conn : &Connection, last : DateTime<Utc>) -> Result<i64, Box<dyn s
                 break;
             }
             let link = &entry.links.last().unwrap().href;
-            println!("link {}", link);
+            println!("{}", link);
         }
         thread::sleep(Duration::from_millis(500));
     }
@@ -92,7 +92,7 @@ async fn podcast(conn : &Connection, last : DateTime<Utc>, dry_run : bool) -> Re
             let media = entry.media.last().unwrap();
             let link = media.content.last().unwrap().url.as_ref().unwrap();
             if dry_run {
-                println!("link {}", link);
+                println!("{}", link);
             }else{
                 let resp = reqwest::get(link.as_str()).await.expect("request failed");
                 let body = resp.bytes().await.expect("body invalid");
@@ -136,11 +136,7 @@ async fn youtube(conn : &Connection, last : DateTime<Utc>, dry_run : bool) -> Re
                 break;
             }
             let link = &entry.links.last().unwrap().href;
-            if dry_run {
-                println!("link {}", link);
-            }else{
-                map.entry(channel.folder.to_owned()).and_modify(|e|e.push(link.to_owned())).or_insert_with(|| vec![link.to_owned()]);
-            }
+            map.entry(channel.folder.to_owned()).and_modify(|e|e.push(link.to_owned())).or_insert_with(|| vec![link.to_owned()]);
         }
         thread::sleep(Duration::from_millis(600));
     }
@@ -186,11 +182,7 @@ async fn youtube(conn : &Connection, last : DateTime<Utc>, dry_run : bool) -> Re
 
             if matched {
                 let link = &entry.links.last().unwrap().href;
-                if dry_run {
-                    println!("link {}", link);
-                }else{
-                    map.entry(channel.folder.to_owned()).and_modify(|e|e.push(link.to_owned())).or_insert_with(|| vec![link.to_owned()]);
-                }
+                map.entry(channel.folder.to_owned()).and_modify(|e|e.push(link.to_owned())).or_insert_with(|| vec![link.to_owned()]);
             }
         }
         thread::sleep(Duration::from_millis(600));
