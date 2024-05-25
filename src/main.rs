@@ -1,7 +1,6 @@
 use rusqlite::{Connection, Result};
 use feed_rs::parser;
 use pyo3::prelude::*;
-use chrono::{DateTime,Utc};
 use std::collections::HashMap;
 use std::{thread, time::Duration};
 
@@ -22,7 +21,7 @@ struct Regex {
     negative_match: bool,
 }
 
-async fn blog(conn : &Connection, last : DateTime<Utc>) -> Result<i64, Box<dyn std::error::Error>> {
+async fn blog(conn : &Connection, last : i64) -> Result<i64, Box<dyn std::error::Error>> {
     let mut new_date = last;
     let mut stmt = conn.prepare("SELECT name, url FROM blog")?;
     let data_iter = stmt.query_map([], |row| {
@@ -43,7 +42,7 @@ async fn blog(conn : &Connection, last : DateTime<Utc>) -> Result<i64, Box<dyn s
             continue;
         };
         for entry in feed.entries {
-            let published = entry.published.unwrap();
+            let published = entry.published.unwrap().timestamp();
             if published > last {
                 if published > new_date {
                     new_date = published;
@@ -56,9 +55,9 @@ async fn blog(conn : &Connection, last : DateTime<Utc>) -> Result<i64, Box<dyn s
         }
         thread::sleep(Duration::from_millis(500));
     }
-    Ok(new_date.timestamp())
+    Ok(new_date)
 }
-async fn podcast(conn : &Connection, last : DateTime<Utc>, dry_run : bool) -> Result<i64, Box<dyn std::error::Error>> {
+async fn podcast(conn : &Connection, last : i64, dry_run : bool) -> Result<i64, Box<dyn std::error::Error>> {
     let mut new_date = last;
     let dir = dirs::video_dir().expect("video dir not found");
     let mut stmt = conn.prepare("SELECT name, url FROM podcast")?;
@@ -80,7 +79,7 @@ async fn podcast(conn : &Connection, last : DateTime<Utc>, dry_run : bool) -> Re
             continue;
         };
         for entry in feed.entries {
-            let published = entry.published.unwrap();
+            let published = entry.published.unwrap().timestamp();
             if published > last {
                 if published > new_date {
                     new_date = published;
@@ -102,9 +101,9 @@ async fn podcast(conn : &Connection, last : DateTime<Utc>, dry_run : bool) -> Re
         }
         thread::sleep(Duration::from_millis(500));
     }
-    Ok(new_date.timestamp())
+    Ok(new_date)
 }
-async fn youtube(conn : &Connection, last : DateTime<Utc>, dry_run : bool) -> Result<i64, Box<dyn std::error::Error>> {
+async fn youtube(conn : &Connection, last : i64, dry_run : bool) -> Result<i64, Box<dyn std::error::Error>> {
     let prefix = "https://www.youtube.com/feeds/videos.xml?channel_id=";
     let mut new_date = last;
     let mut map : HashMap<String,Vec<String>> = HashMap::new();
@@ -127,7 +126,7 @@ async fn youtube(conn : &Connection, last : DateTime<Utc>, dry_run : bool) -> Re
             continue;
         };
         for entry in feed.entries {
-            let published = entry.published.unwrap();
+            let published = entry.published.unwrap().timestamp();
             if published > last {
                 if published > new_date {
                     new_date = published;
@@ -163,7 +162,7 @@ async fn youtube(conn : &Connection, last : DateTime<Utc>, dry_run : bool) -> Re
             continue;
         };
         for entry in feed.entries {
-            let published = entry.published.unwrap();
+            let published = entry.published.unwrap().timestamp();
             if published > last {
                 if published > new_date {
                     new_date = published;
@@ -203,7 +202,7 @@ async fn youtube(conn : &Connection, last : DateTime<Utc>, dry_run : bool) -> Re
             }
         });
     }
-    Ok(new_date.timestamp())
+    Ok(new_date)
 }
 
 #[tokio::main]
@@ -211,18 +210,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let dir = dirs::video_dir().expect("video dir not found");
     let conn = Connection::open(dir.join("data.db"))?;
     let last : i64 = conn.query_row("select unix_time_stamp from last;",[], |row| row.get(0))?;
-    let dt = DateTime::from_timestamp(last, 0).expect("invalid timestamp");
     let dry_run = false;
     let mut new_last = last;
-    let last_blog = blog(&conn,dt).await.expect("failed processing blog");
+    let last_blog = blog(&conn,last).await.expect("failed processing blog");
     if last_blog > last {
         new_last = last_blog;
     }
-    let last_podcast = podcast(&conn,dt,dry_run).await.expect("failed processing podcast");
+    let last_podcast = podcast(&conn,last,dry_run).await.expect("failed processing podcast");
     if last_podcast > last {
         new_last = last_podcast;
     }
-    let last_youtube = youtube(&conn,dt,dry_run).await.expect("failed processing youtube");
+    let last_youtube = youtube(&conn,last,dry_run).await.expect("failed processing youtube");
     if last_youtube > last {
         new_last = last_youtube;
     }
