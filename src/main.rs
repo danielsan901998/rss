@@ -3,6 +3,8 @@ use feed_rs::parser;
 use pyo3::prelude::*;
 use std::collections::HashMap;
 use std::{thread, time::Duration};
+use chrono::DateTime;
+use chrono_tz::GMT;
 
 #[derive(Debug)]
 struct Data {
@@ -21,6 +23,26 @@ struct Regex {
     negative_match: bool,
 }
 
+async fn get_request(url : &str, last : i64) -> Result<String,()> {
+    let client = reqwest::Client::new();
+    let dt = DateTime::from_timestamp(last, 0).expect("invalid timestamp");
+    let Ok(resp) = client.get(url).header(reqwest::header::IF_MODIFIED_SINCE, format!("{}", dt.with_timezone(&GMT).format("%a, %d %b %Y %H:%M:%S %Z"))).send().await else {
+        println!("error requesting {}", url);
+        return Err(());
+    };
+    let code = resp.status().as_u16();
+    if code==304 {
+        //No changed
+        return Err(());
+    };
+    if code!=200 {
+        println!("error requesting {}: {}", url, code);
+        return Err(());
+    };
+    Ok(resp.text().await.unwrap())
+
+}
+
 async fn blog(conn : &Connection, last : i64) -> Result<i64, Box<dyn std::error::Error>> {
     let mut new_date = last;
     let mut stmt = conn.prepare("SELECT name, url FROM blog")?;
@@ -33,11 +55,10 @@ async fn blog(conn : &Connection, last : i64) -> Result<i64, Box<dyn std::error:
 
     for it in data_iter {
         let data = it?;
-        let Ok(resp) = reqwest::get(data.url).await else{
-            println!("error requesting {}", data.name);
+        let Ok(resp) = get_request(data.url.as_str(),last).await else{
             continue;
         };
-        let Ok(feed) = parser::parse(resp.text().await?.as_bytes()) else{
+        let Ok(feed) = parser::parse(resp.as_bytes()) else{
             println!("error processing {}", data.name);
             continue;
         };
@@ -70,11 +91,10 @@ async fn podcast(conn : &Connection, last : i64, dry_run : bool) -> Result<i64, 
 
     for it in data_iter {
         let data = it?;
-        let Ok(resp) = reqwest::get(data.url).await else{
-            println!("error requesting {}", data.name);
+        let Ok(resp) = get_request(data.url.as_str(),last).await else{
             continue;
         };
-        let Ok(feed) = parser::parse(resp.text().await?.as_bytes()) else{
+        let Ok(feed) = parser::parse(resp.as_bytes()) else{
             println!("error processing {}", data.name);
             continue;
         };
@@ -117,11 +137,10 @@ async fn youtube(conn : &Connection, last : i64, dry_run : bool) -> Result<i64, 
     })?;
     for it in data_iter {
         let channel = it?;
-        let Ok(resp) = reqwest::get(prefix.to_owned()+channel.id.as_str()).await else{
-            println!("error requesting {}", channel.name);
+        let Ok(resp) = get_request((prefix.to_owned()+channel.id.as_str()).as_str(),last).await else{
             continue;
         };
-        let Ok(feed) = parser::parse(resp.text().await?.as_bytes()) else{
+        let Ok(feed) = parser::parse(resp.as_bytes()) else{
             println!("error processing {}", channel.name);
             continue;
         };
@@ -153,11 +172,10 @@ async fn youtube(conn : &Connection, last : i64, dry_run : bool) -> Result<i64, 
     })?;
     for it in data_iter {
         let (channel,regex) = it?;
-        let Ok(resp) = reqwest::get(prefix.to_owned()+channel.id.as_str()).await else{
-            println!("error requesting {}", channel.name);
+        let Ok(resp) = get_request((prefix.to_owned()+channel.id.as_str()).as_str(),last).await else{
             continue;
         };
-        let Ok(feed) = parser::parse(resp.text().await?.as_bytes()) else{
+        let Ok(feed) = parser::parse(resp.as_bytes()) else{
             println!("error processing {}", channel.name);
             continue;
         };
@@ -191,7 +209,7 @@ async fn youtube(conn : &Connection, last : i64, dry_run : bool) -> Result<i64, 
             let py_app = include_str!(concat!(
                     env!("CARGO_MANIFEST_DIR"),
                     "/youtube.py"
-                    ));
+            ));
             let download: Py<PyAny> = PyModule::from_code_bound(py, py_app, "", "").unwrap() .getattr("download").unwrap().into();
             for (folder, links) in map {
                 if dry_run {
