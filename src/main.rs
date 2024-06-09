@@ -235,11 +235,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         new_last = last_blog;
     }
     let last_podcast = podcast(&conn,last,dry_run).await.expect("failed processing podcast");
-    if last_podcast > last {
+    if last_podcast > new_last {
         new_last = last_podcast;
     }
     let last_youtube = youtube(&conn,last,dry_run).await.expect("failed processing youtube");
-    if last_youtube > last {
+    if last_youtube > new_last {
         new_last = last_youtube;
     }
     if new_last != last {
