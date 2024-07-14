@@ -53,6 +53,17 @@ async fn get_request(url: &str, last: i64) -> Result<String, ()> {
     Ok(resp.text().await.unwrap())
 }
 
+async fn process(url: &str , name : &str, last: i64) -> Result<feed_rs::model::Feed, ()> {
+        let Ok(resp) = get_request(url, last).await else {
+            return Err(());
+        };
+        let Ok(feed) = parser::parse(resp.as_bytes()) else {
+            println!("error processing {}", name);
+            return Err(());
+        };
+        return Ok(feed);
+}
+
 async fn blog(conn: &Connection, last: i64) -> Result<i64, Box<dyn std::error::Error>> {
     let mut new_date = last;
     let mut stmt = conn.prepare("SELECT name, url FROM blog")?;
@@ -65,11 +76,7 @@ async fn blog(conn: &Connection, last: i64) -> Result<i64, Box<dyn std::error::E
 
     for it in data_iter {
         let data = it?;
-        let Ok(resp) = get_request(data.url.as_str(), last).await else {
-            continue;
-        };
-        let Ok(feed) = parser::parse(resp.as_bytes()) else {
-            println!("error processing {}", data.name);
+        let Ok(feed) = process(data.url.as_str(),data.name.as_str(), last).await else {
             continue;
         };
         for entry in feed.entries {
@@ -105,11 +112,7 @@ async fn podcast(
 
     for it in data_iter {
         let data = it?;
-        let Ok(resp) = get_request(data.url.as_str(), last).await else {
-            continue;
-        };
-        let Ok(feed) = parser::parse(resp.as_bytes()) else {
-            println!("error processing {}", data.name);
+        let Ok(feed) = process(data.url.as_str(),data.name.as_str(), last).await else {
             continue;
         };
         for entry in feed.entries {
@@ -130,7 +133,8 @@ async fn podcast(
                 let resp = reqwest::get(link.as_str()).await.expect("request failed");
                 let body = resp.bytes().await.expect("body invalid");
                 let filename = str::replace(&title, "/", "-") + ".mp3";
-                std::fs::write(dir.join("podcast").join(filename), &body).expect("write failed");
+                let path = dir.join("podcast").join(filename);
+                std::fs::write(path, &body).expect("write failed");
             }
         }
         thread::sleep(Duration::from_millis(500));
@@ -157,12 +161,8 @@ async fn youtube(
     })?;
     for it in data_iter {
         let channel = it?;
-        let Ok(resp) = get_request((prefix.to_owned() + channel.id.as_str()).as_str(), last).await
-        else {
-            continue;
-        };
-        let Ok(feed) = parser::parse(resp.as_bytes()) else {
-            println!("error processing {}", channel.name);
+        let url = prefix.to_owned() + channel.id.as_str();
+        let Ok(feed) = process(url.as_str(), channel.name.as_str(), last).await else {
             continue;
         };
         for entry in feed.entries {
@@ -197,12 +197,8 @@ async fn youtube(
     })?;
     for it in data_iter {
         let (channel, regex) = it?;
-        let Ok(resp) = get_request((prefix.to_owned() + channel.id.as_str()).as_str(), last).await
-        else {
-            continue;
-        };
-        let Ok(feed) = parser::parse(resp.as_bytes()) else {
-            println!("error processing {}", channel.name);
+        let url = prefix.to_owned() + channel.id.as_str();
+        let Ok(feed) = process(url.as_str(), channel.name.as_str(), last).await else {
             continue;
         };
         for entry in feed.entries {
