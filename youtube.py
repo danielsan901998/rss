@@ -4,6 +4,8 @@ import shutil
 from os.path import expanduser
 import yt_dlp
 import sys
+import ffmpeg
+import os
 from yt_dlp.postprocessor.common import PostProcessor
 
 
@@ -13,7 +15,18 @@ class PostProcess(PostProcessor):
         self.folder = folder
 
     def run(self, information):
-        shutil.move(information["filepath"], expanduser("~") + "/videos/" + self.folder)
+        try:
+            in_path=information["filepath"]
+            if "Econocrítica" in in_path:
+                tmp_path="/tmp/output.opus"
+                out_path=expanduser("~")+"/videos/"+self.folder+'/'+information["title"]+".opus"
+                ffmpeg.input(in_path, ss="0:00:40").output(tmp_path).run(capture_stderr=True)
+                shutil.move(tmp_path,out_path)
+                os.remove(in_path)
+            else:
+                shutil.move(in_path, expanduser("~")+"/videos/"+self.folder)
+        except Exception as e:
+            print(e)
         return [], information
 
 

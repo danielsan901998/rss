@@ -4,6 +4,9 @@ use feed_rs::parser;
 use pyo3::prelude::*;
 use rusqlite::{Connection, Result};
 use std::collections::HashMap;
+use std::path::Path;
+use std::process::Command;
+use std::process::Stdio;
 use std::{thread, time::Duration};
 
 #[derive(Debug)]
@@ -21,6 +24,31 @@ struct Channel {
 struct Regex {
     regex: String,
     negative_match: bool,
+}
+
+fn post_process(path: &Path) {
+    let dir = dirs::video_dir().expect("video dir not found");
+    let out_path = dir.join("podcast").join(path.file_name().as_ref().unwrap());
+    let tmp_dir = Path::new("/tmp/");
+    let tmp_path = tmp_dir.join("output.opus");
+    let path_str = path.to_str().unwrap();
+    if path_str.contains("Wisteria") {
+        Command::new("ffmpeg")
+            .arg("-ss")
+            .arg("40")
+            .arg("-i")
+            .arg(path)
+            .arg(&tmp_path)
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .output()
+            .expect("failed to execute process");
+        std::fs::copy(&tmp_path, out_path).expect("error copying");
+        std::fs::remove_file(tmp_path).expect("error deleting");
+    } else {
+        std::fs::copy(path, out_path).expect("error copying");
+        std::fs::remove_file(path).expect("error deleting");
+    }
 }
 
 async fn get_request(url: &str, last: i64) -> Result<String, ()> {
@@ -53,15 +81,15 @@ async fn get_request(url: &str, last: i64) -> Result<String, ()> {
     Ok(resp.text().await.unwrap())
 }
 
-async fn process(url: &str , name : &str, last: i64) -> Result<feed_rs::model::Feed, ()> {
-        let Ok(resp) = get_request(url, last).await else {
-            return Err(());
-        };
-        let Ok(feed) = parser::parse(resp.as_bytes()) else {
-            println!("error processing {}", name);
-            return Err(());
-        };
-        return Ok(feed);
+async fn process(url: &str, name: &str, last: i64) -> Result<feed_rs::model::Feed, ()> {
+    let Ok(resp) = get_request(url, last).await else {
+        return Err(());
+    };
+    let Ok(feed) = parser::parse(resp.as_bytes()) else {
+        println!("error processing {}", name);
+        return Err(());
+    };
+    Ok(feed)
 }
 
 async fn blog(conn: &Connection, last: i64) -> Result<i64, Box<dyn std::error::Error>> {
@@ -76,7 +104,7 @@ async fn blog(conn: &Connection, last: i64) -> Result<i64, Box<dyn std::error::E
 
     for it in data_iter {
         let data = it?;
-        let Ok(feed) = process(data.url.as_str(),data.name.as_str(), last).await else {
+        let Ok(feed) = process(data.url.as_str(), data.name.as_str(), last).await else {
             continue;
         };
         for entry in feed.entries {
@@ -101,7 +129,6 @@ async fn podcast(
     dry_run: bool,
 ) -> Result<i64, Box<dyn std::error::Error>> {
     let mut new_date = last;
-    let dir = dirs::video_dir().expect("video dir not found");
     let mut stmt = conn.prepare("SELECT name, url FROM podcast")?;
     let data_iter = stmt.query_map([], |row| {
         Ok(Data {
@@ -112,7 +139,7 @@ async fn podcast(
 
     for it in data_iter {
         let data = it?;
-        let Ok(feed) = process(data.url.as_str(),data.name.as_str(), last).await else {
+        let Ok(feed) = process(data.url.as_str(), data.name.as_str(), last).await else {
             continue;
         };
         for entry in feed.entries {
@@ -132,9 +159,11 @@ async fn podcast(
             } else {
                 let resp = reqwest::get(link.as_str()).await.expect("request failed");
                 let body = resp.bytes().await.expect("body invalid");
-                let filename = str::replace(&title, "/", "-") + ".mp3";
-                let path = dir.join("podcast").join(filename);
-                std::fs::write(path, &body).expect("write failed");
+                let filename = str::replace(&title, "/", "-") + ".opus";
+                let dir = Path::new("/tmp/");
+                let path = dir.join(filename);
+                std::fs::write(path.clone(), &body).expect("write failed");
+                post_process(&path);
             }
         }
         thread::sleep(Duration::from_millis(500));
