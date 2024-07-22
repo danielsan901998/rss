@@ -29,8 +29,6 @@ struct Regex {
 fn post_process(path: &Path) {
     let dir = dirs::video_dir().expect("video dir not found");
     let out_path = dir.join("podcast").join(path.file_name().as_ref().unwrap());
-    let tmp_dir = Path::new("/tmp/");
-    let tmp_path = tmp_dir.join("output.opus");
     let path_str = path.to_str().unwrap();
     if path_str.contains("Wisteria") {
         Command::new("ffmpeg")
@@ -38,13 +36,12 @@ fn post_process(path: &Path) {
             .arg("40")
             .arg("-i")
             .arg(path)
-            .arg(&tmp_path)
+            .arg(&out_path)
             .stdout(Stdio::null())
             .stderr(Stdio::null())
             .output()
             .expect("failed to execute process");
-        std::fs::copy(&tmp_path, out_path).expect("error copying");
-        std::fs::remove_file(tmp_path).expect("error deleting");
+        std::fs::remove_file(path).expect("error deleting");
     } else {
         std::fs::copy(path, out_path).expect("error copying");
         std::fs::remove_file(path).expect("error deleting");
