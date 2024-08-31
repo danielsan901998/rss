@@ -17,14 +17,7 @@ class PostProcess(PostProcessor):
     def run(self, information):
         try:
             in_path=information["filepath"]
-            if "Econocrítica" in in_path:
-                tmp_path="/tmp/output.opus"
-                out_path=expanduser("~")+"/videos/"+self.folder+'/'+information["title"]+".opus"
-                ffmpeg.input(in_path, ss="0:00:40").output(tmp_path).run(capture_stderr=True)
-                shutil.move(tmp_path,out_path)
-                os.remove(in_path)
-            else:
-                shutil.move(in_path, expanduser("~")+"/videos/"+self.folder)
+            shutil.move(in_path, expanduser("~")+"/videos/"+self.folder)
         except Exception as e:
             print(e)
         return [], information
