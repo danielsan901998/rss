@@ -8,6 +8,16 @@ import ffmpeg
 import os
 from yt_dlp.postprocessor.common import PostProcessor
 
+class loggerOutputs:
+    def error(msg):
+        if "Premiere" not in msg and "live event" not in msg:
+            print(msg)
+        return
+    def warning(msg):
+        print(msg)
+        return
+    def debug(msg):
+        return
 
 class PostProcess(PostProcessor):
     def __init__(self, folder):
@@ -26,7 +36,7 @@ class PostProcess(PostProcessor):
 def download(quiet: bool, folder: str, urls: List[str]) -> None:
     video_priority = ["247", "248", "303", "136"]  # webm formats first, then mp4
     audio_priority = ["250", "251", "140"]  # opus formats preferred, then m4a
-    yt_info = yt_dlp.YoutubeDL({"quiet": True})
+    yt_info = yt_dlp.YoutubeDL({"quiet": True, "logger": loggerOutputs})
     for link in urls:
         try:
             meta = yt_info.extract_info(link, download=False)
