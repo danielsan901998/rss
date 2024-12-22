@@ -4,7 +4,6 @@ import shutil
 from os.path import expanduser
 import yt_dlp
 import sys
-import ffmpeg
 import os
 from yt_dlp.postprocessor.common import PostProcessor
 
@@ -35,7 +34,7 @@ class PostProcess(PostProcessor):
 
 def download(quiet: bool, folder: str, urls: List[str]) -> None:
     video_priority = ["247", "248", "303", "136"]  # webm formats first, then mp4
-    audio_priority = ["250", "251", "140"]  # opus formats preferred, then m4a
+    audio_priority = ["250", "250-0", "251", "251-0", "140"]  # opus formats preferred, then m4a
     yt_info = yt_dlp.YoutubeDL({"quiet": True, "logger": loggerOutputs})
     for link in urls:
         try:
@@ -43,51 +42,39 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
             if "live_status" in meta:
                 if meta["live_status"] != "not_live":
                     continue
+            formats = meta.get("formats")
+            video_format = "bestvideo"
+            audio_format = "bestaudio"
+            if formats:
+                video_found = []
+                audio_found = []
+                for f in formats:
+                    format_id = f["format_id"]
+                    if format_id in video_priority:
+                        video_found.append(format_id)
+                    if format_id in audio_priority:
+                        audio_found.append(format_id)
+                for f in video_priority:
+                    if f in video_found:
+                        video_format = f
+                        break
+                for f in audio_priority:
+                    if f in audio_found:
+                        audio_format = f
+                        break
+            yt_format = ""
             if folder == "podcast":
-                ydl = yt_dlp.YoutubeDL(
-                    {
-                        "format": "bestaudio",  # choice of quality
-                        "outtmpl": "/tmp/%(title)s.%(ext)s",
-                        "quiet": quiet,
-                        "noprogress": quiet,
-                        "postprocessors": [
-                            {
-                                "key": "FFmpegExtractAudio",
-                                "preferredcodec": "opus",
-                            }
-                        ],
-                    }
-                )
+                yt_format = audio_format
             else:
-                formats = meta.get("formats")
-                video_format = "bestvideo"
-                audio_format = "bestaudio"
-                if formats:
-                    video_found = []
-                    audio_found = []
-                    for f in formats:
-                        format_id = f["format_id"]
-                        if format_id in video_priority:
-                            video_found.append(format_id)
-                        if format_id in audio_priority:
-                            audio_found.append(format_id)
-                    for f in video_priority:
-                        if f in video_found:
-                            video_format = f
-                            break
-                    for f in audio_priority:
-                        if f in audio_found:
-                            audio_format = f
-                            break
                 yt_format = video_format + "+" + audio_format
-                ydl = yt_dlp.YoutubeDL(
-                    {
-                        "format": yt_format,  # choice of quality
-                        "outtmpl": "/tmp/%(title)s.%(ext)s",
-                        "quiet": quiet,
-                        "noprogress": quiet,
-                    }
-                )
+            ydl = yt_dlp.YoutubeDL(
+                {
+                    "format": yt_format,  # choice of quality
+                    "outtmpl": "/tmp/%(title)s.%(ext)s",
+                    "quiet": quiet,
+                    "noprogress": quiet,
+                }
+            )
             ydl.add_post_processor(PostProcess(folder))
             try:
                 ydl.download([link])
