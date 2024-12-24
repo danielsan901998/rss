@@ -34,14 +34,11 @@ class PostProcess(PostProcessor):
 
 def download(quiet: bool, folder: str, urls: List[str]) -> None:
     video_priority = ["247", "248", "303", "136"]  # webm formats first, then mp4
-    audio_priority = ["250", "250-0", "251", "251-0", "140"]  # opus formats preferred, then m4a
+    audio_priority = ["250", "251", "140"]  # opus formats preferred, then m4a
     yt_info = yt_dlp.YoutubeDL({"quiet": True, "logger": loggerOutputs})
     for link in urls:
         try:
             meta = yt_info.extract_info(link, download=False)
-            if "live_status" in meta:
-                if meta["live_status"] != "not_live":
-                    continue
             formats = meta.get("formats")
             video_format = "bestvideo"
             audio_format = "bestaudio"
@@ -52,8 +49,11 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
                     format_id = f["format_id"]
                     if format_id in video_priority:
                         video_found.append(format_id)
-                    if format_id in audio_priority:
-                        audio_found.append(format_id)
+                    if "language_preference" in f and f["language_preference"]!=10:
+                        continue
+                    for audio_id in audio_priority:
+                        if audio_id in format_id:
+                            audio_found.append(format_id)
                 for f in video_priority:
                     if f in video_found:
                         video_format = f
