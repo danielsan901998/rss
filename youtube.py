@@ -77,6 +77,16 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
                     "outtmpl": "/tmp/%(title)s.%(ext)s",
                     "quiet": quiet,
                     "noprogress": quiet,
+                    'postprocessors': [
+                        {
+                            'key': 'SponsorBlock',
+                            'categories': ['sponsor']
+                            },
+                        {
+                            'key': 'ModifyChapters',
+                            'remove_sponsor_segments': ['sponsor']
+                            }
+                        ],
                 }
             )
             ydl.add_post_processor(PostProcess(folder))
