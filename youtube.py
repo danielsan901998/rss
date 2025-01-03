@@ -7,16 +7,9 @@ import sys
 import os
 from yt_dlp.postprocessor.common import PostProcessor
 
-class loggerOutputs:
-    def error(msg):
-        if "Premiere" not in msg and "live event" not in msg:
-            print(msg)
-        return
-    def warning(msg):
-        print(msg)
-        return
-    def debug(msg):
-        return
+video_priority = ["247", "248", "303", "136"]  # webm formats first, then mp4
+audio_priority = ["250", "251", "140"]  # opus formats preferred, then m4a
+audio_only = False
 
 class PostProcess(PostProcessor):
     def __init__(self, folder):
@@ -31,49 +24,58 @@ class PostProcess(PostProcessor):
             print(e)
         return [], information
 
+def find_first_priority_match(priority_list, formats):
+  for codec in priority_list:
+    for f in formats:
+      if f["format_id"] == codec:
+        return f
+  return None
+
+def format_builder(ctx):
+    selected=[]
+    video_found = []
+    audio_found = []
+    for f in ctx["formats"]:
+        format_id = f["format_id"]
+        if format_id in video_priority:
+            video_found.append(f)
+            continue
+        if format_id in audio_priority:
+            audio_found.append(f)
+            continue
+        if "language_preference" in f and f["language_preference"]!=10:
+            continue
+        for audio_id in audio_priority:
+            if audio_id in format_id:
+                audio_found.append(f)
+    if not audio_only:
+        video_codec = find_first_priority_match(video_priority,video_found)
+        if video_codec:
+            selected.append(video_codec)
+    audio_codec = find_first_priority_match(audio_priority,audio_found)
+    if audio_codec:
+        selected.append(audio_codec)
+    if len(selected)==0:
+        return []
+    ext = "webm"
+    for f in selected:
+        if f["ext"] != "webm":
+            ext = "mkv"
+    return [{
+        'requested_formats': selected,
+        'format': "+".join(item["format"] for item in selected),
+        'format_id': "+".join(item["format_id"] for item in selected),
+        'ext': ext,
+        }]
 
 def download(quiet: bool, folder: str, urls: List[str]) -> None:
-    video_priority = ["247", "248", "303", "136"]  # webm formats first, then mp4
-    audio_priority = ["250", "251", "140"]  # opus formats preferred, then m4a
-    yt_info = yt_dlp.YoutubeDL({"quiet": True, "logger": loggerOutputs})
+    global audio_only
+    audio_only = folder == "podcast"
     for link in urls:
         try:
-            meta = yt_info.extract_info(link, download=False)
-            formats = meta.get("formats")
-            video_format = "bestvideo"
-            audio_format = "bestaudio"
-            if formats:
-                video_found = []
-                audio_found = []
-                for f in formats:
-                    format_id = f["format_id"]
-                    if format_id in video_priority:
-                        video_found.append(format_id)
-                        continue
-                    if format_id in audio_priority:
-                        audio_found.append(format_id)
-                        continue
-                    if "language_preference" in f and f["language_preference"]!=10:
-                        continue
-                    for audio_id in audio_priority:
-                        if audio_id in format_id:
-                            audio_found.append(format_id)
-                for f in video_priority:
-                    if f in video_found:
-                        video_format = f
-                        break
-                for f in audio_priority:
-                    if f in audio_found:
-                        audio_format = f
-                        break
-            yt_format = ""
-            if folder == "podcast":
-                yt_format = audio_format
-            else:
-                yt_format = video_format + "+" + audio_format
             ydl = yt_dlp.YoutubeDL(
                 {
-                    "format": yt_format,  # choice of quality
+                    "format": format_builder,
                     "outtmpl": "/tmp/%(title)s.%(ext)s",
                     "quiet": quiet,
                     "noprogress": quiet,
