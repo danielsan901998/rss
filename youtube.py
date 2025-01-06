@@ -27,7 +27,7 @@ class PostProcess(PostProcessor):
 def find_first_priority_match(priority_list, formats):
   for codec in priority_list:
     for f in formats:
-      if f["format_id"] == codec:
+      if codec in f["format_id"]:
         return f
   return None
 
@@ -82,11 +82,11 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
                     'postprocessors': [
                         {
                             'key': 'SponsorBlock',
-                            'categories': ['sponsor']
+                            'categories': ['sponsor','selfpromo']
                             },
                         {
                             'key': 'ModifyChapters',
-                            'remove_sponsor_segments': ['sponsor']
+                            'remove_sponsor_segments': ['sponsor','selfpromo']
                             }
                         ],
                 }
