@@ -73,8 +73,7 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
     audio_only = folder == "podcast"
     for link in urls:
         try:
-            ydl = yt_dlp.YoutubeDL(
-                {
+            args = {
                     "format": format_builder,
                     "outtmpl": "/tmp/%(title)s.%(ext)s",
                     "quiet": quiet,
@@ -89,8 +88,10 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
                             'remove_sponsor_segments': ['sponsor','selfpromo']
                             }
                         ],
-                }
-            )
+                    }
+            if audio_only:
+                args["postprocessors"].append({"key": "FFmpegExtractAudio", "preferredcodec": "opus"})
+            ydl = yt_dlp.YoutubeDL(args)
             ydl.add_post_processor(PostProcess(folder))
             try:
                 ydl.download([link])
