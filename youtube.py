@@ -81,11 +81,11 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
                     'postprocessors': [
                         {
                             'key': 'SponsorBlock',
-                            'categories': ['sponsor','selfpromo']
+                            'categories': ['sponsor','selfpromo','interaction']
                             },
                         {
                             'key': 'ModifyChapters',
-                            'remove_sponsor_segments': ['sponsor','selfpromo']
+                            'remove_sponsor_segments': ['sponsor','selfpromo','interaction']
                             }
                         ],
                     }

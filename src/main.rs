@@ -42,6 +42,18 @@ fn post_process(path: &Path) {
             .output()
             .expect("failed to execute process");
         std::fs::remove_file(path).expect("error deleting");
+    } else if path_str.contains("Diario de Ucrania") {
+        Command::new("ffmpeg")
+            .arg("-ss")
+            .arg("4")
+            .arg("-i")
+            .arg(path)
+            .arg(&out_path)
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .output()
+            .expect("failed to execute process");
+        std::fs::remove_file(path).expect("error deleting");
     } else {
         std::fs::copy(path, out_path).expect("error copying");
         std::fs::remove_file(path).expect("error deleting");
