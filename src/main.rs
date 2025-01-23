@@ -55,7 +55,14 @@ fn post_process(path: &Path) {
             .expect("failed to execute process");
         std::fs::remove_file(path).expect("error deleting");
     } else {
-        std::fs::copy(path, out_path).expect("error copying");
+        Command::new("ffmpeg")
+            .arg("-i")
+            .arg(path)
+            .arg(&out_path)
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .output()
+            .expect("failed to execute process");
         std::fs::remove_file(path).expect("error deleting");
     }
 }
