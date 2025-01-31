@@ -16,7 +16,10 @@ class loggerOutputs:
         print(msg)
     def debug(self,msg):
         if not self.quiet:
-            print(msg)
+            if msg.startswith('[download] ') and "ETA" in msg:
+                print(msg, end='\x1b[1K\r')
+            else:
+                print(msg)
 
 video_priority = ["247", "248", "303", "136"]  # webm formats first, then mp4
 audio_priority = ["250", "251", "140"]  # opus formats preferred, then m4a
