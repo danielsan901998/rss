@@ -6,10 +6,20 @@ import yt_dlp
 import sys
 import os
 from yt_dlp.postprocessor.common import PostProcessor
+class loggerOutputs:
+    def __init__(self, quiet):
+        self.quiet = quiet
+    def error(self,msg):
+        if "Premiere" not in msg and "live event" not in msg:
+            print(msg)
+    def warning(self,msg):
+        print(msg)
+    def debug(self,msg):
+        if not self.quiet:
+            print(msg)
 
 video_priority = ["247", "248", "303", "136"]  # webm formats first, then mp4
 audio_priority = ["250", "251", "140"]  # opus formats preferred, then m4a
-audio_only = False
 
 class PostProcess(PostProcessor):
     def __init__(self, folder):
@@ -31,72 +41,72 @@ def find_first_priority_match(priority_list, formats):
         return f
   return None
 
-def format_builder(ctx):
-    selected=[]
-    video_found = []
-    audio_found = []
-    for f in ctx["formats"]:
-        format_id = f["format_id"]
-        if format_id in video_priority:
-            video_found.append(f)
-            continue
-        if format_id in audio_priority:
-            audio_found.append(f)
-            continue
-        if "language_preference" in f and f["language_preference"]!=10:
-            continue
-        for audio_id in audio_priority:
-            if audio_id in format_id:
+class format_builder:
+    def __init__(self, audio_only):
+        self.audio_only = audio_only
+    def get_format(self,ctx):
+        selected=[]
+        video_found = []
+        audio_found = []
+        for f in ctx["formats"]:
+            format_id = f["format_id"]
+            if format_id in video_priority:
+                video_found.append(f)
+                continue
+            if format_id in audio_priority:
                 audio_found.append(f)
-    if not audio_only:
-        video_codec = find_first_priority_match(video_priority,video_found)
-        if video_codec:
-            selected.append(video_codec)
-    audio_codec = find_first_priority_match(audio_priority,audio_found)
-    if audio_codec:
-        selected.append(audio_codec)
-    if len(selected)==0:
-        return []
-    ext = "webm"
-    for f in selected:
-        if f["ext"] != "webm":
-            ext = "mkv"
-    return [{
-        'requested_formats': selected,
-        'format': "+".join(item["format"] for item in selected),
-        'format_id': "+".join(item["format_id"] for item in selected),
-        'ext': ext,
-        }]
+                continue
+            if "language_preference" in f and f["language_preference"]!=10:
+                continue
+            for audio_id in audio_priority:
+                if audio_id in format_id:
+                    audio_found.append(f)
+        if not self.audio_only:
+            video_codec = find_first_priority_match(video_priority,video_found)
+            if video_codec:
+                selected.append(video_codec)
+        audio_codec = find_first_priority_match(audio_priority,audio_found)
+        if audio_codec:
+            selected.append(audio_codec)
+        if len(selected)==0:
+            return []
+        ext = "webm"
+        for f in selected:
+            if f["ext"] != "webm":
+                ext = "mkv"
+        return [{
+            'requested_formats': selected,
+            'format': "+".join(item["format"] for item in selected),
+            'format_id': "+".join(item["format_id"] for item in selected),
+            'ext': ext,
+            }]
 
 def download(quiet: bool, folder: str, urls: List[str]) -> None:
-    global audio_only
     audio_only = folder == "podcast"
     for link in urls:
+        args = {
+                "format": format_builder(audio_only).get_format,
+                "outtmpl": "/tmp/%(title)s.%(ext)s",
+                "quiet": quiet,
+                "noprogress": quiet,
+                "logger": loggerOutputs(quiet),
+                'postprocessors': [
+                    {
+                        'key': 'SponsorBlock',
+                        'categories': ['sponsor','selfpromo','interaction']
+                        },
+                    {
+                        'key': 'ModifyChapters',
+                        'remove_sponsor_segments': ['sponsor','selfpromo','interaction']
+                        }
+                    ],
+                }
+        if audio_only:
+            args["postprocessors"].append({"key": "FFmpegExtractAudio", "preferredcodec": "opus"})
+        ydl = yt_dlp.YoutubeDL(args)
+        ydl.add_post_processor(PostProcess(folder))
         try:
-            args = {
-                    "format": format_builder,
-                    "outtmpl": "/tmp/%(title)s.%(ext)s",
-                    "quiet": quiet,
-                    "noprogress": quiet,
-                    'postprocessors': [
-                        {
-                            'key': 'SponsorBlock',
-                            'categories': ['sponsor','selfpromo','interaction']
-                            },
-                        {
-                            'key': 'ModifyChapters',
-                            'remove_sponsor_segments': ['sponsor','selfpromo','interaction']
-                            }
-                        ],
-                    }
-            if audio_only:
-                args["postprocessors"].append({"key": "FFmpegExtractAudio", "preferredcodec": "opus"})
-            ydl = yt_dlp.YoutubeDL(args)
-            ydl.add_post_processor(PostProcess(folder))
-            try:
-                ydl.download([link])
-            except yt_dlp.utils.DownloadError as e:
-                print("download error " + link+": "+e.msg)
+            ydl.download([link])
         except yt_dlp.utils.DownloadError as e:
             if "Premiere" not in e.msg and "live event" not in e.msg:
                 print("download error " + link+": "+e.msg)
