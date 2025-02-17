@@ -1,14 +1,15 @@
 #!/usr/bin/python3
 from typing import List
+from typing import Optional
 import shutil
 from os.path import expanduser
 import yt_dlp
 import sys
-import os
 from yt_dlp.postprocessor.common import PostProcessor
 class loggerOutputs:
-    def __init__(self, quiet):
+    def __init__(self, quiet: bool):
         self.quiet = quiet
+        self.progress = False
     def error(self,msg):
         if "Premiere" not in msg and "live event" not in msg:
             print(msg)
@@ -17,15 +18,23 @@ class loggerOutputs:
     def debug(self,msg):
         if not self.quiet:
             if msg.startswith('[download] ') and "ETA" in msg:
-                print(msg, end='\x1b[1K\r')
+                if self.progress:
+                    print('\x1b[1K\r'+msg,end='')
+                else:
+                    self.progress=True
+                    print(msg,end='')
             else:
-                print(msg)
+                if self.progress:
+                    print('\x1b[1K\r'+msg)
+                    self.progress=False
+                else:
+                    print(msg)
 
 video_priority = ["247", "248", "303", "136"]  # webm formats first, then mp4
 audio_priority = ["250", "251", "140"]  # opus formats preferred, then m4a
 
 class PostProcess(PostProcessor):
-    def __init__(self, folder):
+    def __init__(self, folder: str):
         PostProcessor.__init__(self)
         self.folder = folder
 
@@ -45,7 +54,7 @@ def find_first_priority_match(priority_list, formats):
   return None
 
 class format_builder:
-    def __init__(self, audio_only):
+    def __init__(self, audio_only: bool):
         self.audio_only = audio_only
     def get_format(self,ctx):
         selected=[]
@@ -84,11 +93,17 @@ class format_builder:
             'ext': ext,
             }]
 
+def filter_live(info_dict, *, incomplete: bool) -> Optional[str]:
+    if info_dict["is_live"] or info_dict["was_live"]:
+        return "Skip livestream"
+    return None
+
 def download(quiet: bool, folder: str, urls: List[str]) -> None:
     audio_only = folder == "podcast"
     for link in urls:
         args = {
                 "format": format_builder(audio_only).get_format,
+                "match_filter": filter_live,
                 "outtmpl": "/tmp/%(title)s.%(ext)s",
                 "quiet": quiet,
                 "noprogress": quiet,
