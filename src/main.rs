@@ -173,7 +173,8 @@ async fn podcast(
             if dry_run {
                 println!("{}", link);
             } else {
-                let resp = reqwest::get(link.as_str()).await.expect("request failed");
+                let client = reqwest::Client::builder().user_agent("rss-app").build()?;
+                let resp = client.get(link.as_str()).send().await.expect("request failed");
                 let body = resp.bytes().await.expect("body invalid");
                 let filename = str::replace(&title, "/", "-") + ".opus";
                 let dir = Path::new("/tmp/");
