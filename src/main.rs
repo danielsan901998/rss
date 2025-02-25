@@ -13,6 +13,7 @@ use std::{thread, time::Duration};
 struct Data {
     name: String,
     url: String,
+    last: i64,
 }
 #[derive(Debug)]
 struct Channel {
@@ -108,26 +109,34 @@ async fn process(url: &str, name: &str, last: i64) -> Result<feed_rs::model::Fee
     Ok(feed)
 }
 
-async fn blog(conn: &Connection, last: i64) -> Result<i64, Box<dyn std::error::Error>> {
-    let mut new_date = last;
-    let mut stmt = conn.prepare("SELECT name, url FROM blog")?;
+async fn blog(conn: &Connection, dry_run: bool) -> Result<(), Box<dyn std::error::Error>> {
+    let mut stmt = conn.prepare("SELECT name, url, last FROM blog")?;
     let data_iter = stmt.query_map([], |row| {
         Ok(Data {
             name: row.get(0)?,
             url: row.get(1)?,
+            last: row.get(2)?,
         })
     })?;
 
     for it in data_iter {
         let data = it?;
+        let last = data.last;
+        let mut new_last = last;
         let Ok(feed) = process(data.url.as_str(), data.name.as_str(), last).await else {
             continue;
         };
         for entry in feed.entries {
             let published = entry.published.unwrap().timestamp();
             if published > last {
-                if published > new_date {
-                    new_date = published;
+                if published > new_last {
+                    new_last = published;
+                    if dry_run {
+                        println!("updating timestamp to {}", new_last);
+                    } else {
+                        conn.execute("update blog set last = ? where name = ?", [new_last.to_string(),data.name.clone()])
+                            .expect("failed to update last timestamp in blog");
+                    }
                 }
             } else {
                 break;
@@ -137,32 +146,36 @@ async fn blog(conn: &Connection, last: i64) -> Result<i64, Box<dyn std::error::E
         }
         thread::sleep(Duration::from_millis(500));
     }
-    Ok(new_date)
+    Ok(())
 }
-async fn podcast(
-    conn: &Connection,
-    last: i64,
-    dry_run: bool,
-) -> Result<i64, Box<dyn std::error::Error>> {
-    let mut new_date = last;
-    let mut stmt = conn.prepare("SELECT name, url FROM podcast")?;
+async fn podcast(conn: &Connection, dry_run: bool) -> Result<(), Box<dyn std::error::Error>> {
+    let mut stmt = conn.prepare("SELECT name, url, last FROM podcast")?;
     let data_iter = stmt.query_map([], |row| {
         Ok(Data {
             name: row.get(0)?,
             url: row.get(1)?,
+            last: row.get(2)?,
         })
     })?;
 
     for it in data_iter {
         let data = it?;
+        let last = data.last;
+        let mut new_last = last;
         let Ok(feed) = process(data.url.as_str(), data.name.as_str(), last).await else {
             continue;
         };
         for entry in feed.entries {
             let published = entry.published.unwrap().timestamp();
             if published > last {
-                if published > new_date {
-                    new_date = published;
+                if published > new_last {
+                    new_last = published;
+                    if dry_run {
+                        println!("updating timestamp to {}", new_last);
+                    } else {
+                        conn.execute("update podcast set last = ? where name = ?", [new_last.to_string(),data.name.clone()])
+                            .expect("failed to update last timestamp in podcast");
+                    }
                 }
             } else {
                 break;
@@ -174,7 +187,11 @@ async fn podcast(
                 println!("{}", link);
             } else {
                 let client = reqwest::Client::builder().user_agent("rss-app").build()?;
-                let resp = client.get(link.as_str()).send().await.expect("request failed");
+                let resp = client
+                    .get(link.as_str())
+                    .send()
+                    .await
+                    .expect("request failed");
                 let body = resp.bytes().await.expect("body invalid");
                 let filename = str::replace(&title, "/", "-") + ".opus";
                 let dir = Path::new("/tmp/");
@@ -183,9 +200,9 @@ async fn podcast(
                 post_process(&path);
             }
         }
-        thread::sleep(Duration::from_millis(500));
+        thread::sleep(Duration::from_millis(400));
     }
-    Ok(new_date)
+    Ok(())
 }
 async fn youtube(
     conn: &Connection,
@@ -193,7 +210,7 @@ async fn youtube(
     dry_run: bool,
 ) -> Result<i64, Box<dyn std::error::Error>> {
     let prefix = "https://www.youtube.com/feeds/videos.xml?channel_id=";
-    let mut new_date = last;
+    let mut new_last = last;
     let mut map: HashMap<String, Vec<String>> = HashMap::new();
     let mut stmt = conn.prepare(
         "select id,name,folder from youtube where download = true and regex_id is null;",
@@ -214,8 +231,8 @@ async fn youtube(
         for entry in feed.entries {
             let published = entry.published.unwrap().timestamp();
             if published > last {
-                if published > new_date {
-                    new_date = published;
+                if published > new_last {
+                    new_last = published;
                 }
             } else {
                 break;
@@ -225,7 +242,7 @@ async fn youtube(
                 .and_modify(|e| e.push(link.to_owned()))
                 .or_insert_with(|| vec![link.to_owned()]);
         }
-        thread::sleep(Duration::from_millis(600));
+        thread::sleep(Duration::from_millis(400));
     }
     let mut stmt = conn.prepare("select youtube.id,youtube.name,folder,value,negative_match from youtube inner join regex on regex_id=regex.id where download = true;")?;
     let data_iter = stmt.query_map([], |row| {
@@ -250,8 +267,8 @@ async fn youtube(
         for entry in feed.entries {
             let published = entry.published.unwrap().timestamp();
             if published > last {
-                if published > new_date {
-                    new_date = published;
+                if published > new_last {
+                    new_last = published;
                 }
             } else {
                 break;
@@ -271,7 +288,7 @@ async fn youtube(
                     .or_insert_with(|| vec![link.to_owned()]);
             }
         }
-        thread::sleep(Duration::from_millis(600));
+        thread::sleep(Duration::from_millis(400));
     }
     if !map.is_empty() {
         Python::with_gil(|py| {
@@ -290,7 +307,7 @@ async fn youtube(
             }
         });
     }
-    Ok(new_date)
+    Ok(new_last)
 }
 
 #[tokio::main]
@@ -299,23 +316,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let conn = Connection::open(dir.join("data.db"))?;
     let last: i64 = conn.query_row("select unix_time_stamp from last;", [], |row| row.get(0))?;
     let dry_run = false;
-    let mut new_last = last;
-    let last_blog = blog(&conn, last).await.expect("failed processing blog");
-    if last_blog > last {
-        new_last = last_blog;
-    }
-    let last_podcast = podcast(&conn, last, dry_run)
+    blog(&conn, dry_run).await.expect("failed processing blog");
+    podcast(&conn, dry_run)
         .await
         .expect("failed processing podcast");
-    if last_podcast > new_last {
-        new_last = last_podcast;
-    }
-    let last_youtube = youtube(&conn, last, dry_run)
+    let new_last = youtube(&conn, last, dry_run)
         .await
         .expect("failed processing youtube");
-    if last_youtube > new_last {
-        new_last = last_youtube;
-    }
     if new_last != last {
         if dry_run {
             println!("updating timestamp to {}", new_last);
