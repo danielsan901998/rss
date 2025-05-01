@@ -93,9 +93,11 @@ class format_builder:
             'ext': ext,
             }]
 
-def filter_live(info_dict, *, incomplete: bool) -> Optional[str]:
+def filter_live_and_short(info_dict, *, incomplete: bool) -> Optional[str]:
     if info_dict["is_live"] or info_dict["was_live"]:
         return "Skip livestream"
+    if info_dict["duration"] < 90:
+        return "Skip #short"
     return None
 
 def download(quiet: bool, folder: str, urls: List[str]) -> None:
@@ -103,7 +105,7 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
     for link in urls:
         args = {
                 "format": format_builder(audio_only).get_format,
-                "match_filter": filter_live,
+                "match_filter": filter_live_and_short,
                 "outtmpl": "/tmp/%(title)s.%(ext)s",
                 "quiet": quiet,
                 "noprogress": quiet,
