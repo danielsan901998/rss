@@ -126,6 +126,7 @@ async fn blog(conn: &Connection, dry_run: bool) -> Result<(), Box<dyn std::error
         let Ok(feed) = process(data.url.as_str(), data.name.as_str(), last).await else {
             continue;
         };
+        let mut links: Vec<String> = Vec::new();
         for entry in feed.entries {
             let published = entry.published.unwrap().timestamp();
             if published > last {
@@ -141,8 +142,10 @@ async fn blog(conn: &Connection, dry_run: bool) -> Result<(), Box<dyn std::error
             } else {
                 break;
             }
-            let link = &entry.links.last().unwrap().href;
-            println!("{}", link);
+            links.push(entry.links.last().unwrap().href.clone());
+        }
+        for link in links.iter().rev() { // Iterate over the vector in reverse order
+            println!("{}", link); // Print each link
         }
         thread::sleep(Duration::from_millis(500));
     }
