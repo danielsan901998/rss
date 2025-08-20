@@ -109,6 +109,7 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
                 "outtmpl": "/tmp/%(title)s.%(ext)s",
                 "quiet": quiet,
                 "noprogress": quiet,
+                'retries': 10,
                 "logger": loggerOutputs(quiet),
                 'postprocessors': [
                     {
