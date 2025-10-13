@@ -130,7 +130,7 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
             ydl.download([link])
         except yt_dlp.utils.DownloadError as e:
             if "Premiere" not in e.msg and "live event" not in e.msg:
-                print("download error " + link+": "+e.msg)
+                print("download error " + link+" "+e.msg)
     sys.stdout.flush()
 
 

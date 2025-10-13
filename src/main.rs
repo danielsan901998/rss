@@ -2,6 +2,7 @@ use chrono::DateTime;
 use chrono_tz::GMT;
 use feed_rs::parser;
 use pyo3::prelude::*;
+use pyo3::ffi::c_str;
 use rusqlite::{Connection, Result};
 use std::collections::HashMap;
 use std::path::Path;
@@ -295,8 +296,8 @@ async fn youtube(
     }
     if !map.is_empty() {
         Python::with_gil(|py| {
-            let py_app = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/youtube.py"));
-            let download: Py<PyAny> = PyModule::from_code_bound(py, py_app, "", "")
+            let py_app = c_str!(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/youtube.py")));
+            let download: Py<PyAny> = PyModule::from_code(py, py_app, c_str!(""), c_str!(""))
                 .unwrap()
                 .getattr("download")
                 .unwrap()
