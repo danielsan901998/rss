@@ -32,41 +32,34 @@ fn post_process(path: &Path) {
     let dir = dirs::video_dir().expect("video dir not found");
     let out_path = dir.join("podcast").join(path.file_name().as_ref().unwrap());
     let path_str = path.to_str().unwrap();
+
+    let mut command = Command::new("ffmpeg");
+    command
+        .arg("-nostdin")
+        .arg("-i")
+        .arg(path);
+
     if path_str.contains("Wisteria") {
-        Command::new("ffmpeg")
-            .arg("-ss")
-            .arg("40")
-            .arg("-i")
-            .arg(path)
-            .arg(&out_path)
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .output()
-            .expect("failed to execute process");
-        std::fs::remove_file(path).expect("error deleting");
+        command.arg("-ss").arg("40");
     } else if path_str.contains("Diario de Ucrania") {
-        Command::new("ffmpeg")
-            .arg("-ss")
-            .arg("4")
-            .arg("-i")
-            .arg(path)
-            .arg(&out_path)
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .output()
-            .expect("failed to execute process");
-        std::fs::remove_file(path).expect("error deleting");
-    } else {
-        Command::new("ffmpeg")
-            .arg("-i")
-            .arg(path)
-            .arg(&out_path)
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .output()
-            .expect("failed to execute process");
-        std::fs::remove_file(path).expect("error deleting");
+        command.arg("-ss").arg("4");
     }
+
+    command
+        .arg("-b:a")
+        .arg("64K")
+        .arg("-af")
+        .arg("silenceremove=start_periods=1:stop_periods=-1:start_threshold=-40dB:stop_threshold=-40dB:start_silence=0.4:stop_silence=0.4")
+        .arg("-f")
+        .arg("opus")
+        .arg("-y")
+        .arg(&out_path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .output()
+        .expect("failed to execute ffmpeg process");
+
+    std::fs::remove_file(path).expect("error deleting original file");
 }
 
 async fn get_request(url: &str, last: i64) -> Result<String, ()> {

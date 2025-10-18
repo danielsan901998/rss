@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 from typing import List
 from typing import Optional
+import subprocess
 import shutil
+import os
 from os.path import expanduser
 import yt_dlp
 import sys
@@ -30,10 +32,10 @@ class loggerOutputs:
                 else:
                     print(msg)
 
-video_priority = ["247", "248", "303", "136"]  # webm formats first, then mp4
+video_priority = ["247", "248", "302", "136"]  # webm formats first, then mp4
 audio_priority = ["250", "251", "140"]  # opus formats preferred, then m4a
 
-class PostProcess(PostProcessor):
+class PostProcessMove(PostProcessor):
     def __init__(self, folder: str):
         PostProcessor.__init__(self)
         self.folder = folder
@@ -45,6 +47,38 @@ class PostProcess(PostProcessor):
         except Exception as e:
             print(e)
         return [], information
+
+class FFmpegSilenceRemovePP(PostProcessor):
+    def __init__(self):
+        PostProcessor.__init__(self)
+
+    def run(self, info):
+        filepath = info['filepath']
+        name_without_extension = os.path.splitext(filepath)[0]
+        new_filepath = f"{name_without_extension}.opus"
+        
+        # Construct the silenceremove filter string
+        silence_filter = "silenceremove=start_periods=1:stop_periods=-1:start_threshold=-40dB:stop_threshold=-40dB:start_silence=0.4:stop_silence=0.4"
+
+        # FFmpeg command to remove silence
+        # -y to overwrite output file without asking
+        # -nostdin to prevent ffmpeg from trying to read from stdin
+        cmd = [
+            'ffmpeg', '-nostdin', '-i', filepath,
+            '-af', silence_filter,
+            '-b:a', '64K',
+            '-f', 'opus',
+            '-y', new_filepath
+        ]
+        
+        try:
+            subprocess.run(cmd, stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
+            info['filepath'] = new_filepath
+        except Exception as e:
+            self.to_screen(f'[ffmpeg] Error removing silence: {e}')
+            raise yt_dlp.utils.DownloadError
+
+        return [filepath], info
 
 def find_first_priority_match(priority_list, formats):
   for codec in priority_list:
@@ -122,10 +156,10 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
                         }
                     ],
                 }
-        if audio_only:
-            args["postprocessors"].append({"key": "FFmpegExtractAudio", "preferredcodec": "opus"})
         ydl = yt_dlp.YoutubeDL(args)
-        ydl.add_post_processor(PostProcess(folder))
+        if audio_only:
+            ydl.add_post_processor(FFmpegSilenceRemovePP())
+        ydl.add_post_processor(PostProcessMove(folder), when="after_move")
         try:
             ydl.download([link])
         except yt_dlp.utils.DownloadError as e:
