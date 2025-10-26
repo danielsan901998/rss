@@ -40,7 +40,7 @@ fn post_process(path: &Path) {
         .arg(path);
 
     if path_str.contains("Wisteria") {
-        command.arg("-ss").arg("40");
+        command.arg("-ss").arg("34");
     } else if path_str.contains("Diario de Ucrania") {
         command.arg("-ss").arg("4");
     }
