@@ -72,10 +72,11 @@ class FFmpegSilenceRemovePP(PostProcessor):
         ]
         
         try:
+            self.to_screen(f'Removing silence, destination: {new_filepath}')
             subprocess.run(cmd, stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
             info['filepath'] = new_filepath
         except Exception as e:
-            self.to_screen(f'[ffmpeg] Error removing silence: {e}')
+            self.to_screen(f'Error removing silence: {e}')
             raise yt_dlp.utils.DownloadError
 
         return [filepath], info
@@ -128,6 +129,8 @@ class format_builder:
             }]
 
 def filter_live_and_short(info_dict, *, incomplete: bool) -> Optional[str]:
+    if info_dict["was_live"] and "Econocrítica" in info_dict["fulltitle"]:
+        return None
     if info_dict["is_live"] or info_dict["was_live"]:
         return "Skip livestream"
     if info_dict["duration"] < 90:
