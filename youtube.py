@@ -32,7 +32,7 @@ class loggerOutputs:
                 else:
                     print(msg)
 
-video_priority = ["247", "248", "302", "136"]  # webm formats first, then mp4
+video_priority = ["247","136", "248", "302"]  # 720p first 30fps webm as priority
 audio_priority = ["250", "251", "140"]  # opus formats preferred, then m4a
 
 class PostProcessMove(PostProcessor):
@@ -43,9 +43,14 @@ class PostProcessMove(PostProcessor):
     def run(self, information):
         try:
             in_path=information["filepath"]
-            shutil.move(in_path, expanduser("~")+"/videos/"+self.folder)
+            dest_dir = expanduser("~")+"/videos/"+self.folder
+            dest_path = os.path.join(dest_dir,os.path.basename(in_path))
+            
+            if os.path.exists(dest_path):
+                os.remove(dest_path)
+            shutil.move(in_path, dest_path)
         except Exception as e:
-            print(e)
+            self.to_screen(f'Error moving: {e}')
         return [], information
 
 class FFmpegSilenceRemovePP(PostProcessor):
@@ -74,6 +79,7 @@ class FFmpegSilenceRemovePP(PostProcessor):
         try:
             self.to_screen(f'Removing silence, destination: {new_filepath}')
             subprocess.run(cmd, stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
+            subprocess.run(["trim-audio",new_filepath], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
             info['filepath'] = new_filepath
         except Exception as e:
             self.to_screen(f'Error removing silence: {e}')

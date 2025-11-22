@@ -41,15 +41,13 @@ fn post_process(path: &Path) {
 
     if path_str.contains("Wisteria") {
         command.arg("-ss").arg("34");
-    } else if path_str.contains("Diario de Ucrania") {
-        command.arg("-ss").arg("4");
     }
 
     command
         .arg("-b:a")
         .arg("64K")
         .arg("-af")
-        .arg("silenceremove=start_periods=1:stop_periods=-1:start_threshold=-40dB:stop_threshold=-40dB:start_silence=0.4:stop_silence=0.4")
+        .arg("silenceremove=start_periods=1:stop_periods=-1:start_threshold=-30dB:stop_threshold=-30dB:start_silence=0.4:stop_silence=0.4")
         .arg("-f")
         .arg("opus")
         .arg("-y")
@@ -58,6 +56,12 @@ fn post_process(path: &Path) {
         .stderr(Stdio::null())
         .output()
         .expect("failed to execute ffmpeg process");
+    Command::new("trim-audio")
+        .arg(&out_path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .output()
+        .expect("failed to execute trim-audio process");
 
     std::fs::remove_file(path).expect("error deleting original file");
 }
