@@ -31,21 +31,11 @@ struct Regex {
 fn post_process(path: &Path) {
     let dir = dirs::video_dir().expect("video dir not found");
     let out_path = dir.join("podcast").join(path.file_name().as_ref().unwrap());
-    let path_str = path.to_str().unwrap();
 
-    let mut command = Command::new("ffmpeg");
-    command
+    Command::new("ffmpeg")
         .arg("-nostdin")
         .arg("-i")
-        .arg(path);
-
-    if path_str.contains("Wisteria") {
-        command.arg("-ss").arg("34");
-    } else if path_str.contains("Diario de Ucrania") {
-        command.arg("-ss").arg("4");
-    }
-
-    command
+        .arg(path)
         .arg("-b:a")
         .arg("64K")
         .arg("-af")
@@ -53,6 +43,12 @@ fn post_process(path: &Path) {
         .arg("-f")
         .arg("opus")
         .arg("-y")
+        .arg(&out_path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .output()
+        .expect("failed to execute ffmpeg process");
+    Command::new("trim-audio")
         .arg(&out_path)
         .stdout(Stdio::null())
         .stderr(Stdio::null())
