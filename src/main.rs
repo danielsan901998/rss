@@ -303,7 +303,7 @@ async fn youtube(
                 if dry_run {
                     println!("downloading {:?} to {}", links, folder);
                 } else {
-                    let _ = download.call1(py, (true, folder, links)).unwrap();
+                    let _ = download.call1(py, (true, folder, links, true)).unwrap();
                 }
             }
         });

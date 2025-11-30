@@ -143,7 +143,7 @@ def filter_live_and_short(info_dict, *, incomplete: bool) -> Optional[str]:
         return "Skip #short"
     return None
 
-def download(quiet: bool, folder: str, urls: List[str]) -> None:
+def download(quiet: bool, folder: str, urls: List[str], sponsorblock: bool) -> None:
     audio_only = folder == "podcast"
     for link in urls:
         args = {
@@ -154,17 +154,19 @@ def download(quiet: bool, folder: str, urls: List[str]) -> None:
                 "noprogress": quiet,
                 'retries': 10,
                 "logger": loggerOutputs(quiet),
-                'postprocessors': [
-                    {
-                        'key': 'SponsorBlock',
-                        'categories': ['sponsor','selfpromo','interaction']
-                        },
-                    {
-                        'key': 'ModifyChapters',
-                        'remove_sponsor_segments': ['sponsor','selfpromo','interaction']
-                        }
-                    ],
+                'postprocessors': []
                 }
+        if sponsorblock:
+            args['postprocessors'].extend([
+                {
+                    'key': 'SponsorBlock',
+                    'categories': ['sponsor','selfpromo','interaction']
+                    },
+                {
+                    'key': 'ModifyChapters',
+                    'remove_sponsor_segments': ['sponsor','selfpromo','interaction']
+                    }
+                ])
         ydl = yt_dlp.YoutubeDL(args)
         if audio_only:
             ydl.add_post_processor(FFmpegSilenceRemovePP())
@@ -186,10 +188,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "-q", "--quiet", dest="quiet", help="quiet mode", action="store_true"
     )
+    parser.add_argument(
+        "--no-sponsorblock", dest="sponsorblock", action="store_false", help="Disable SponsorBlock postprocessor (enabled by default)"
+    )
     parser.set_defaults(quiet=False)
+    parser.set_defaults(sponsorblock=True)
 
     args = parser.parse_args()
     folder = ""
     if args.folder:
         folder = args.folder
-    download(quiet=args.quiet, folder=folder, urls=args.urls)
+    download(quiet=args.quiet, folder=folder, urls=args.urls, sponsorblock=args.sponsorblock)
