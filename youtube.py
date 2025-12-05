@@ -32,7 +32,7 @@ class loggerOutputs:
                 else:
                     print(msg)
 
-video_priority = ["247","136", "248", "302"]  # 720p first 30fps webm as priority
+video_priority = ["247","398","136", "399", "248", "302"]  # 720p 30fps AV1 first (reduce filesize)
 audio_priority = ["250", "251", "140"]  # opus formats preferred, then m4a
 
 class PostProcessMove(PostProcessor):
