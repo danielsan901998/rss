@@ -56,12 +56,12 @@ fn post_process(path: &Path) {
         .stderr(Stdio::null())
         .output()
         .expect("failed to execute ffmpeg process");
-    Command::new("trim-audio")
+    Command::new("detect-speech")
         .arg(&out_path)
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .output()
-        .expect("failed to execute trim-audio process");
+        .expect("failed to execute detect-speech process");
 
     std::fs::remove_file(path).expect("error deleting original file");
 }
@@ -289,7 +289,7 @@ async fn youtube(
                     .or_insert_with(|| vec![link.to_owned()]);
             }
         }
-        thread::sleep(Duration::from_millis(400));
+        thread::sleep(Duration::from_millis(800));
     }
     if !map.is_empty() {
         Python::with_gil(|py| {
@@ -316,7 +316,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let dir = dirs::video_dir().expect("video dir not found");
     let conn = Connection::open(dir.join("data.db"))?;
     let last: i64 = conn.query_row("select unix_time_stamp from last;", [], |row| row.get(0))?;
-    let dry_run = false;
+    let dry_run = std::env::var("DRY_RUN").is_ok();
     blog(&conn, dry_run).await.expect("failed processing blog");
     podcast(&conn, dry_run)
         .await

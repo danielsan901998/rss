@@ -32,7 +32,7 @@ class loggerOutputs:
                 else:
                     print(msg)
 
-video_priority = ["247","136", "248", "302"]  # 720p first 30fps webm as priority
+video_priority = ["247","398","136", "399", "248", "302","298"]  # 720p 30fps AV1 first (reduce filesize)
 audio_priority = ["250", "251", "140"]  # opus formats preferred, then m4a
 
 class PostProcessMove(PostProcessor):
@@ -79,7 +79,7 @@ class FFmpegSilenceRemovePP(PostProcessor):
         try:
             self.to_screen(f'Removing silence, destination: {new_filepath}')
             subprocess.run(cmd, stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
-            subprocess.run(["trim-audio",new_filepath], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
+            subprocess.run(["detect-speech",new_filepath], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
             info['filepath'] = new_filepath
         except Exception as e:
             self.to_screen(f'Error removing silence: {e}')
@@ -116,8 +116,9 @@ class format_builder:
                     audio_found.append(f)
         if not self.audio_only:
             video_codec = find_first_priority_match(video_priority,video_found)
-            if video_codec:
-                selected.append(video_codec)
+            if not video_codec:
+                return []
+            selected.append(video_codec)
         audio_codec = find_first_priority_match(audio_priority,audio_found)
         if audio_codec:
             selected.append(audio_codec)
