@@ -16,8 +16,11 @@ class loggerOutputs:
         if "Premiere" not in msg and "live event" not in msg:
             print(msg)
     def warning(self,msg):
-        print(msg)
+        if "SABR" not in msg:
+            print(msg)
     def debug(self,msg):
+        if "SABR" in msg:
+            return
         if not self.quiet:
             if msg.startswith('[download] ') and "ETA" in msg:
                 if self.progress:
