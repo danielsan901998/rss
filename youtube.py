@@ -83,6 +83,11 @@ class FFmpegSilenceRemovePP(PostProcessor):
             self.to_screen(f'Removing silence, destination: {new_filepath}')
             subprocess.run(cmd, stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
             subprocess.run(["detect-speech",new_filepath], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
+            if info["fulltitle"].startswith("Econocrítica"):
+                if subprocess.run(["detect-word", new_filepath, "muy buenas"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0:
+                    if os.path.exists("/tmp/trim-output.opus"):
+                        shutil.copyfile("/tmp/trim-output.opus", new_filepath)
+                        os.remove("/tmp/trim-output.opus")
             info['filepath'] = new_filepath
         except Exception as e:
             self.to_screen(f'Error removing silence: {e}')
