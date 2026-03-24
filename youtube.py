@@ -158,6 +158,7 @@ def download(quiet: bool, folder: str, urls: List[str], sponsorblock: bool) -> N
                 "noprogress": quiet,
                 'retries': 10,
                 "logger": loggerOutputs(quiet),
+                'cookiesfrombrowser': ('chrome', None, None, None),
                 'postprocessors': []
                 }
         if sponsorblock:
