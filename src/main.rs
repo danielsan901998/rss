@@ -31,17 +31,12 @@ struct Regex {
 fn post_process(path: &Path) {
     let dir = dirs::video_dir().expect("video dir not found");
     let out_path = dir.join("podcast").join(path.file_name().as_ref().unwrap());
-    let path_str = path.to_str().unwrap();
 
     let mut command = Command::new("ffmpeg");
     command
         .arg("-nostdin")
         .arg("-i")
         .arg(path);
-
-    if path_str.contains("Wisteria") {
-        command.arg("-ss").arg("34");
-    }
 
     command
         .arg("-b:a")
@@ -210,7 +205,7 @@ async fn youtube(
     last: i64,
     dry_run: bool,
 ) -> Result<i64, Box<dyn std::error::Error>> {
-    let prefix = "https://www.youtube.com/feeds/videos.xml?channel_id=";
+    let prefix = "https://www.youtube.com/feeds/videos.xml?";
     let mut new_last = last;
     let mut map: HashMap<String, Vec<String>> = HashMap::new();
     let mut stmt = conn.prepare(
