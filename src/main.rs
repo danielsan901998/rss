@@ -287,7 +287,7 @@ async fn youtube(
         thread::sleep(Duration::from_millis(800));
     }
     if !map.is_empty() {
-        Python::with_gil(|py| {
+        Python::attach(|py| {
             let py_app = c_str!(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/youtube.py")));
             let download: Py<PyAny> = PyModule::from_code(py, py_app, c_str!(""), c_str!(""))
                 .unwrap()
