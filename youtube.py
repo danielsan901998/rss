@@ -106,49 +106,59 @@ class format_builder:
     def __init__(self, audio_only: bool):
         self.audio_only = audio_only
     def get_format(self,ctx):
-        selected=[]
+        selected = []
         video_found = []
         audio_found = []
+        
         for f in ctx["formats"]:
             format_id = f["format_id"]
+            
             if format_id in video_priority:
                 video_found.append(f)
                 continue
-            if format_id in audio_priority:
+                
+            is_audio = format_id in audio_priority or any(audio_id in format_id for audio_id in audio_priority)
+            
+            if is_audio:
                 audio_found.append(f)
                 continue
-            if "language_preference" in f and f["language_preference"]!=10:
-                continue
-            for audio_id in audio_priority:
-                if audio_id in format_id:
-                    audio_found.append(f)
+
         if not self.audio_only:
-            video_codec = find_first_priority_match(video_priority,video_found)
+            video_codec = find_first_priority_match(video_priority, video_found)
             if not video_codec:
                 return []
             selected.append(video_codec)
-        audio_codec = find_first_priority_match(audio_priority,audio_found)
+            
+        # 4. Filtrado inteligente de IDIOMA ORIGINAL (Prioridad 10)
+        if audio_found:
+            # Buscamos si existe al menos alguna pista marcada explícitamente con preferencia 10 (Principal)
+            has_primary_audio = any(f.get('language_preference') == 10 for f in audio_found)
+            
+        audio_codec = find_first_priority_match(audio_priority, audio_found)
         if audio_codec:
             selected.append(audio_codec)
-        if len(selected)==0:
+            
+        if len(selected) == 0:
             return []
+            
         ext = "webm"
         for f in selected:
             if f["ext"] != "webm":
                 ext = "mkv"
+                
         return [{
             'requested_formats': selected,
             'format': "+".join(item["format"] for item in selected),
             'format_id': "+".join(item["format_id"] for item in selected),
             'ext': ext,
-            }]
+        }]
 
 def filter_live_and_short(info_dict, *, incomplete: bool) -> Optional[str]:
     if info_dict["was_live"] and "Econocrítica" in info_dict["fulltitle"]:
         return None
     if info_dict["is_live"] or info_dict["was_live"]:
         return "Skip livestream"
-    if info_dict["duration"] < 90:
+    if info_dict["duration"] < 30:
         return "Skip #short"
     return None
 
@@ -163,18 +173,18 @@ def download(quiet: bool, folder: str, urls: List[str], sponsorblock: bool) -> N
                 "noprogress": quiet,
                 'retries': 10,
                 "logger": loggerOutputs(quiet),
-                #'cookiesfrombrowser': ('chrome', None, None, None),
+                'cookiesfrombrowser': ('chrome', None, None, None),
                 'postprocessors': []
                 }
         if sponsorblock:
             args['postprocessors'].extend([
                 {
                     'key': 'SponsorBlock',
-                    'categories': ['sponsor','selfpromo','interaction']
+                    'categories': ['sponsor','selfpromo','interaction','preview','outro','intro']
                     },
                 {
                     'key': 'ModifyChapters',
-                    'remove_sponsor_segments': ['sponsor','selfpromo','interaction']
+                    'remove_sponsor_segments': ['sponsor','selfpromo','interaction','preview','outro','intro']
                     }
                 ])
         ydl = yt_dlp.YoutubeDL(args)
