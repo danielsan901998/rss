@@ -5,6 +5,7 @@ use pyo3::prelude::*;
 use pyo3::ffi::c_str;
 use rusqlite::{Connection, Result};
 use std::collections::HashMap;
+use std::fs;
 use std::path::Path;
 use std::process::Command;
 use std::process::Stdio;
@@ -31,6 +32,7 @@ struct Regex {
 fn post_process(path: &Path) {
     let dir = dirs::video_dir().expect("video dir not found");
     let out_path = dir.join("podcast").join(path.file_name().as_ref().unwrap());
+    let path_str = path.to_str().unwrap();
 
     let mut command = Command::new("ffmpeg");
     command
@@ -57,6 +59,16 @@ fn post_process(path: &Path) {
         .stderr(Stdio::null())
         .output()
         .expect("failed to execute detect-speech process");
+    if path_str.contains("Wisteria") {
+        Command::new("detect-word")
+            .arg(&out_path)
+            .arg("radio5")
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .output()
+            .expect("failed to execute detect-word process");
+        fs::copy("/tmp/trim-output.opus", &out_path).expect("failed copy");
+    }
 
     std::fs::remove_file(path).expect("error deleting original file");
 }
