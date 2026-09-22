@@ -68,9 +68,10 @@ fn post_process(path: &Path) {
             .output()
             .expect("failed to execute detect-word process");
         fs::copy("/tmp/trim-output.opus", &out_path).expect("failed copy");
+        fs::remove_file("/tmp/trim-output.opus").expect("error deleting trimmed output");
     }
 
-    std::fs::remove_file(path).expect("error deleting original file");
+    fs::remove_file(path).expect("error deleting original file");
 }
 
 async fn get_request(url: &str, last: i64) -> Result<String, ()> {
