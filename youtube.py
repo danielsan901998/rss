@@ -84,7 +84,7 @@ class FFmpegSilenceRemovePP(PostProcessor):
             subprocess.run(cmd, stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
             subprocess.run(["detect-speech",new_filepath], stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
             if info["fulltitle"].startswith("Econocrítica"):
-                if subprocess.run(["detect-word", new_filepath, "muy buenas"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0:
+                if subprocess.run(["detect-word", new_filepath, "bienvenidas"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0:
                     if os.path.exists("/tmp/trim-output.opus"):
                         shutil.copyfile("/tmp/trim-output.opus", new_filepath)
                         os.remove("/tmp/trim-output.opus")
@@ -133,6 +133,13 @@ class format_builder:
         if audio_found:
             # Buscamos si existe al menos alguna pista marcada explícitamente con preferencia 10 (Principal)
             has_primary_audio = any(f.get('language_preference') == 10 for f in audio_found)
+        
+            if has_primary_audio:
+                # Si existen pistas principales, filtramos la lista para dejar ÚNICAMENTE esas
+                audio_found = [f for f in audio_found if f.get('language_preference') == 10]
+            else:
+                # Fallback: Si no hay ninguna con valor 10 (videos estándar), descartamos doblajes obvios (<= -10)
+                audio_found = [f for f in audio_found if not (isinstance(f.get('language_preference'), (int, float)) and f.get('language_preference') <= -10)]
             
         audio_codec = find_first_priority_match(audio_priority, audio_found)
         if audio_codec:
